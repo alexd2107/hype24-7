@@ -43,6 +43,7 @@
 
   async function loadFeatured() {
     const container = document.getElementById("featured-products");
+    container.innerHTML = ""; // clear
 
     try {
       const response = await fetch(featuredSheetUrl);
@@ -52,21 +53,21 @@
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
-          console.log("Raw parse:", results); // 👈 check in browser console
+          console.log("Parsed data:", results);
 
-          const rows = results.data.slice(0, 4);
+          const rows = results.data.slice(0, 8); // show first 8 products
           rows.forEach(row => {
             const card = document.createElement("div");
             card.className = "product-card";
 
-            let details = "";
-            for (let key in row) {
-              if (row[key] && row[key].trim() !== "") {
-                details += `<p><strong>${key}:</strong> ${row[key]}</p>`;
-              }
-            }
+            card.innerHTML = `
+              <div class="product-info">
+                <h3>${row.Name || "Unnamed Product"}</h3>
+                <p class="price">${row.Price || "Price on request"}</p>
+                <p class="size">Size: ${row.Size || "N/A"}</p>
+              </div>
+            `;
 
-            card.innerHTML = `<div class="product-info">${details}</div>`;
             container.appendChild(card);
           });
         }
