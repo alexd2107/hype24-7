@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products</title>
-  <!-- ✅ Load external CSS -->
-  <link rel="stylesheet" href="style.css">
-  <!-- ✅ PapaParse for CSV -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <title>Products - Hype24/7</title>
+  <link rel="stylesheet" href="style.css"> <!-- ✅ make sure style.css is in same folder -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <header>
@@ -17,25 +15,27 @@
       <a href="products.html">Products</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
+      <a href="cart.html">Cart</a>
     </nav>
   </header>
 
   <section class="featured-products">
     <h2>Our Products</h2>
 
-    <!-- ✅ Search + filter -->
-    <div style="margin-bottom: 20px;">
-      <input type="text" id="search" placeholder="Search products...">
+    <!-- Search + Filter Controls -->
+    <div style="margin-bottom:20px; display:flex; gap:15px; flex-wrap:wrap;">
+      <input type="text" id="searchInput" placeholder="Search products...">
       <select id="sizeFilter">
-        <option value="">Filter by Size</option>
+        <option value="">Filter by size</option>
       </select>
     </div>
 
-    <div class="product-grid" id="products"></div>
+    <!-- Products grid -->
+    <div id="products" class="product-grid"></div>
   </section>
 
   <footer>
-    <p>&copy; 2024 Hype24/7. All rights reserved.</p>
+    <p>&copy; 2025 Hype24/7. All rights reserved.</p>
   </footer>
 
   <script>
@@ -58,19 +58,16 @@
     function loadAllSheets() {
       let promises = sheetUrls.map(url =>
         fetch(url)
-          .then(r => r.text())
-          .then(csv => {
-            return new Promise(resolve => {
-              Papa.parse(csv, {
-                header: true,
-                complete: results => resolve(results.data)
-              });
-            });
+          .then(res => res.text())
+          .then(csv => Papa.parse(csv, { header: true }).data)
+          .catch(err => {
+            console.error("Error fetching sheet:", url, err);
+            return [];
           })
       );
 
-      Promise.all(promises).then(dataArrays => {
-        allProducts = dataArrays.flat().filter(p => p.Name); // keep rows with a product name
+      Promise.all(promises).then(results => {
+        allProducts = results.flat();
         renderProducts(allProducts);
         populateSizeFilter(allProducts);
       });
@@ -78,47 +75,44 @@
 
     function renderProducts(products) {
       const container = document.getElementById("products");
-      container.innerHTML = "";
-      products.forEach(p => {
-        let sizes = (p.Sizes || "").split(",").map(s => s.trim()).filter(Boolean);
-        let sizeOptions = sizes.map(s => `<option value="${s}">${s}</option>`).join("");
-        container.innerHTML += `
-          <div class="product-card">
-            <img src="${p.Image || ''}" alt="${p.Name}">
-            <h3>${p.Name}</h3>
-            <p class="price">${p.Price ? "$" + p.Price : ""}</p>
-            ${sizes.length ? `<select>${sizeOptions}</select>` : ""}
-          </div>
-        `;
-      });
+      container.innerHTML = products.map(p => `
+        <div class="product-card">
+          <img src="${p.Image || 'placeholder.jpg'}" alt="${p.Name}">
+          <h3>${p.Name || ''}</h3>
+          <p class="price">${p.Price || ''}</p>
+          <p>${p.Size || ''}</p>
+        </div>
+      `).join("");
     }
 
     function populateSizeFilter(products) {
-      const select = document.getElementById("sizeFilter");
-      let sizes = new Set();
-      products.forEach(p => {
-        (p.Sizes || "").split(",").forEach(s => {
-          if (s.trim()) sizes.add(s.trim());
-        });
-      });
+      const sizeFilter = document.getElementById("sizeFilter");
+      const sizes = [...new Set(products.map(p => p.Size).filter(Boolean))];
       sizes.forEach(size => {
-        let option = document.createElement("option");
+        const option = document.createElement("option");
         option.value = size;
         option.textContent = size;
-        select.appendChild(option);
+        sizeFilter.appendChild(option);
       });
     }
 
-    // ✅ Search + filter logic
-    document.getElementById("search").addEventListener("input", e => {
-      let query = e.target.value.toLowerCase();
-      let filtered = allProducts.filter(p => p.Name && p.Name.toLowerCase().includes(query));
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const searchValue = this.value.toLowerCase();
+      const sizeValue = document.getElementById("sizeFilter").value;
+      const filtered = allProducts.filter(p =>
+        (!searchValue || (p.Name && p.Name.toLowerCase().includes(searchValue))) &&
+        (!sizeValue || p.Size === sizeValue)
+      );
       renderProducts(filtered);
     });
 
-    document.getElementById("sizeFilter").addEventListener("change", e => {
-      let size = e.target.value;
-      let filtered = size ? allProducts.filter(p => (p.Sizes || "").includes(size)) : allProducts;
+    document.getElementById("sizeFilter").addEventListener("change", function () {
+      const searchValue = document.getElementById("searchInput").value.toLowerCase();
+      const sizeValue = this.value;
+      const filtered = allProducts.filter(p =>
+        (!searchValue || (p.Name && p.Name.toLowerCase().includes(searchValue))) &&
+        (!sizeValue || p.Size === sizeValue)
+      );
       renderProducts(filtered);
     });
 
@@ -126,4 +120,5 @@
   </script>
 </body>
 </html>
+
 
