@@ -3,26 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop – Hype24/7</title>
+  <title>Products - Hype24/7</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <header>
     <div class="logo">Hype24/7</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="products.html">Shop</a>
+      <a href="products.html">Products</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
     </nav>
   </header>
 
   <section class="featured-products">
-    <h2>Our Inventory</h2>
-    <div id="product-list" class="product-grid"></div>
+    <h2>All Products</h2>
+    <div class="filters">
+      <input type="text" id="searchInput" placeholder="Search products...">
+      <select id="sizeFilter">
+        <option value="">Filter by size</option>
+      </select>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
   </section>
 
+  <footer>
+    <p>&copy; 2025 Hype24/7. All rights reserved.</p>
+  </footer>
+
   <script>
-    const sheetUrls = [
+    const csvUrls = [
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
@@ -36,48 +48,73 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
-    async function loadProducts() {
-      let allProducts = [];
+    const productGrid = document.getElementById("productGrid");
+    const searchInput = document.getElementById("searchInput");
+    const sizeFilter = document.getElementById("sizeFilter");
+    let allProducts = [];
 
-      for (let url of sheetUrls) {
-        await new Promise((resolve) => {
-          Papa.parse(url, {
-            download: true,
-            header: true,
-            complete: (results) => {
-              allProducts.push(...results.data);
-              resolve();
-            }
-          });
-        });
+    async function loadAllCSVs() {
+      for (let url of csvUrls) {
+        await fetch(url)
+          .then(response => response.text())
+          .then(csvText => {
+            Papa.parse(csvText, {
+              header: true,
+              skipEmptyLines: true,
+              complete: function(results) {
+                allProducts = allProducts.concat(results.data);
+                renderProducts(allProducts);
+                populateSizes(allProducts);
+              }
+            });
+          })
+          .catch(err => console.error("CSV Load Error:", err));
       }
-
-      renderProducts(allProducts);
     }
 
     function renderProducts(products) {
-      const container = document.getElementById("product-list");
-      container.innerHTML = "";
+      productGrid.innerHTML = "";
+      let searchValue = searchInput.value.toLowerCase();
+      let sizeValue = sizeFilter.value;
 
-      products.forEach(product => {
-        const name = product.Name || product.Product || product.Title || "";
-        if (!name.trim()) return;
+      let filtered = products.filter(p => {
+        let matchesSearch = p.Name?.toLowerCase().includes(searchValue);
+        let matchesSize = sizeValue ? p.Size?.includes(sizeValue) : true;
+        return matchesSearch && matchesSize;
+      });
 
-        const price = product.Price || product.Cost || product.Amount || "";
-        const size = product.Size || product.Sizes || "";
-
+      filtered.forEach(p => {
         const card = document.createElement("div");
         card.className = "product-card";
         card.innerHTML = `
-          <h3>${name}</h3>
-          ${price ? `<p class="price">${price}</p>` : ""}
-          ${size ? `<p>${size}</p>` : ""}
+          <h3>${p.Name || "Unnamed Product"}</h3>
+          <p class="price">${p.Price ? "$" + p.Price : "Price N/A"}</p>
+          <p>Size: ${p.Size || "N/A"}</p>
         `;
-        container.appendChild(card);
+        productGrid.appendChild(card);
       });
     }
 
-    loadProducts();
+    function populateSizes(products) {
+      let sizes = new Set();
+      products.forEach(p => {
+        if (p.Size) {
+          p.Size.split(",").forEach(s => sizes.add(s.trim()));
+        }
+      });
+      sizeFilter.innerHTML = '<option value="">Filter by size</option>';
+      sizes.forEach(size => {
+        let option = document.createElement("option");
+        option.value = size;
+        option.textContent = size;
+        sizeFilter.appendChild(option);
+      });
+    }
+
+    searchInput.addEventListener("input", () => renderProducts(allProducts));
+    sizeFilter.addEventListener("change", () => renderProducts(allProducts));
+
+    loadAllCSVs();
   </script>
 </body>
 </html>
