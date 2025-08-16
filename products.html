@@ -2,30 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Products</title>
-  <link rel="stylesheet" href="style.css"> <!-- remove if no CSS file -->
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    #controls { margin-bottom: 20px; }
-    .product { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 6px; }
-    .product h3 { margin: 0; }
-    .sizes { margin-top: 8px; }
-  </style>
+  <!-- ✅ Load external CSS -->
+  <link rel="stylesheet" href="style.css">
+  <!-- ✅ PapaParse for CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-  <h1>Shop Inventory</h1>
+  <header>
+    <div class="logo">Hype24/7</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
 
-  <div id="controls">
-    <input type="text" id="search" placeholder="Search by name...">
-    <select id="sizeFilter">
-      <option value="">All Sizes</option>
-    </select>
-  </div>
+  <section class="featured-products">
+    <h2>Our Products</h2>
 
-  <div id="product-list"></div>
+    <!-- ✅ Search + filter -->
+    <div style="margin-bottom: 20px;">
+      <input type="text" id="search" placeholder="Search products...">
+      <select id="sizeFilter">
+        <option value="">Filter by Size</option>
+      </select>
+    </div>
 
-  <!-- PapaParse -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <div class="product-grid" id="products"></div>
+  </section>
+
+  <footer>
+    <p>&copy; 2024 Hype24/7. All rights reserved.</p>
+  </footer>
+
   <script>
     const sheetUrls = [
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
@@ -43,85 +55,75 @@
 
     let allProducts = [];
 
-    function fetchSheet(url) {
-      return new Promise((resolve, reject) => {
-        Papa.parse(url, {
-          download: true,
-          header: true,
-          complete: results => resolve(results.data),
-          error: err => reject(err)
-        });
+    function loadAllSheets() {
+      let promises = sheetUrls.map(url =>
+        fetch(url)
+          .then(r => r.text())
+          .then(csv => {
+            return new Promise(resolve => {
+              Papa.parse(csv, {
+                header: true,
+                complete: results => resolve(results.data)
+              });
+            });
+          })
+      );
+
+      Promise.all(promises).then(dataArrays => {
+        allProducts = dataArrays.flat().filter(p => p.Name); // keep rows with a product name
+        renderProducts(allProducts);
+        populateSizeFilter(allProducts);
       });
     }
 
-    async function loadAllSheets() {
-      let promises = sheetUrls.map(url => fetchSheet(url));
-      let results = await Promise.all(promises);
-      allProducts = results.flat();
-      renderProducts(allProducts);
-      populateSizeFilter(allProducts);
-    }
-
     function renderProducts(products) {
-      const container = document.getElementById("product-list");
+      const container = document.getElementById("products");
       container.innerHTML = "";
-
       products.forEach(p => {
-        if (!p.Name) return; // skip empty rows
-        let sizes = [];
-        for (let key in p) {
-          if (key.toLowerCase().includes("size") && p[key]) {
-            sizes.push(`${key}: $${p[key]}`);
-          }
-        }
-
-        const div = document.createElement("div");
-        div.className = "product";
-        div.innerHTML = `
-          <h3>${p.Name}</h3>
-          <p>${p.Description || ""}</p>
-          <div class="sizes">${sizes.join("<br>")}</div>
+        let sizes = (p.Sizes || "").split(",").map(s => s.trim()).filter(Boolean);
+        let sizeOptions = sizes.map(s => `<option value="${s}">${s}</option>`).join("");
+        container.innerHTML += `
+          <div class="product-card">
+            <img src="${p.Image || ''}" alt="${p.Name}">
+            <h3>${p.Name}</h3>
+            <p class="price">${p.Price ? "$" + p.Price : ""}</p>
+            ${sizes.length ? `<select>${sizeOptions}</select>` : ""}
+          </div>
         `;
-        container.appendChild(div);
       });
     }
 
     function populateSizeFilter(products) {
-      const sizeFilter = document.getElementById("sizeFilter");
+      const select = document.getElementById("sizeFilter");
       let sizes = new Set();
       products.forEach(p => {
-        for (let key in p) {
-          if (key.toLowerCase().includes("size") && p[key]) {
-            sizes.add(key);
-          }
-        }
+        (p.Sizes || "").split(",").forEach(s => {
+          if (s.trim()) sizes.add(s.trim());
+        });
       });
-
       sizes.forEach(size => {
         let option = document.createElement("option");
         option.value = size;
         option.textContent = size;
-        sizeFilter.appendChild(option);
+        select.appendChild(option);
       });
     }
 
+    // ✅ Search + filter logic
     document.getElementById("search").addEventListener("input", e => {
-      const query = e.target.value.toLowerCase();
-      const filtered = allProducts.filter(p => p.Name && p.Name.toLowerCase().includes(query));
+      let query = e.target.value.toLowerCase();
+      let filtered = allProducts.filter(p => p.Name && p.Name.toLowerCase().includes(query));
       renderProducts(filtered);
     });
 
     document.getElementById("sizeFilter").addEventListener("change", e => {
-      const size = e.target.value;
-      if (!size) {
-        renderProducts(allProducts);
-      } else {
-        const filtered = allProducts.filter(p => p[size]);
-        renderProducts(filtered);
-      }
+      let size = e.target.value;
+      let filtered = size ? allProducts.filter(p => (p.Sizes || "").includes(size)) : allProducts;
+      renderProducts(filtered);
     });
 
-    loadAllSheets();
+    document.addEventListener("DOMContentLoaded", loadAllSheets);
   </script>
 </body>
 </html>
+
