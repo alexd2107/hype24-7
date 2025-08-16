@@ -38,44 +38,43 @@
 
   <!-- PapaParse for CSV parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script>
-    const featuredSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv";
+ <script>
+  const featuredSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv";
 
-    async function loadFeatured() {
-      const container = document.getElementById("featured-products");
+  async function loadFeatured() {
+    const container = document.getElementById("featured-products");
 
-      try {
-        const response = await fetch(featuredSheetUrl);
-        const csvText = await response.text();
+    try {
+      const response = await fetch(featuredSheetUrl);
+      const csvText = await response.text();
 
-        Papa.parse(csvText, {
-          header: true,
-          complete: (results) => {
-            // just grab first 4 rows that have data
-            const rows = results.data.filter(r => Object.values(r).some(v => v && v.trim() !== "")).slice(0, 4);
+      Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          console.log("Raw parse:", results); // 👈 check in browser console
 
-            rows.forEach(row => {
-              const card = document.createElement("div");
-              card.className = "product-card";
+          const rows = results.data.slice(0, 4);
+          rows.forEach(row => {
+            const card = document.createElement("div");
+            card.className = "product-card";
 
-              let details = "";
-              for (let key in row) {
-                if (row[key] && row[key].trim() !== "") {
-                  details += `<p><strong>${key}:</strong> ${row[key]}</p>`;
-                }
+            let details = "";
+            for (let key in row) {
+              if (row[key] && row[key].trim() !== "") {
+                details += `<p><strong>${key}:</strong> ${row[key]}</p>`;
               }
+            }
 
-              card.innerHTML = `<div class="product-info">${details}</div>`;
-              container.appendChild(card);
-            });
-          }
-        });
-      } catch (err) {
-        console.error("Error fetching featured sheet:", err);
-      }
+            card.innerHTML = `<div class="product-info">${details}</div>`;
+            container.appendChild(card);
+          });
+        }
+      });
+    } catch (err) {
+      console.error("Error fetching featured sheet:", err);
     }
+  }
 
-    document.addEventListener("DOMContentLoaded", loadFeatured);
-  </script>
-</body>
-</html>
+  document.addEventListener("DOMContentLoaded", loadFeatured);
+</script>
