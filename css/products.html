@@ -2,116 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Products</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <header>
-    <div class="logo">My Store</div>
+    <div class="logo">My Shop</div>
     <nav>
       <a href="index.html">Home</a>
       <a href="products.html">Products</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
       <a href="cart.html">Cart</a>
     </nav>
   </header>
 
-  <main>
-    <section class="featured-products">
-      <h1>Our Products</h1>
-
-      <!-- Search + Filter -->
-      <input type="text" id="searchInput" placeholder="Search products...">
-      <select id="sizeFilter">
-        <option value="">All Sizes</option>
-        <option value="S">S</option>
-        <option value="M">M</option>
-        <option value="L">L</option>
-      </select>
-
-      <div id="products" class="product-grid"></div>
-    </section>
-  </main>
+  <section class="featured-products">
+    <h2>All Products</h2>
+    <div id="product-list" class="product-grid"></div>
+  </section>
 
   <footer>
-    <p>&copy; 2025 My Store</p>
+    <p>&copy; 2025 My Shop</p>
   </footer>
 
-  <script>
-    const sheetUrls = [
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
-    ];
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-    let allProducts = [];
-
-    function loadAllSheets() {
-      let promises = sheetUrls.map(url =>
-        fetch(url)
-          .then(res => res.text())
-          .then(csv => Papa.parse(csv, { header: true }).data)
-          .catch(err => {
-            console.error("Error fetching sheet:", url, err);
-            return [];
-          })
-      );
-
-      Promise.all(promises).then(results => {
-        allProducts = results.flat().filter(row => Object.values(row).some(v => v && v.trim() !== ""));
-        renderProducts(allProducts);
-      });
-    }
-
-    function renderProducts(products) {
-      const container = document.getElementById("products");
-      container.innerHTML = "";
-
-      products.forEach(row => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-
-        for (let key in row) {
-          if (row[key] && row[key].trim() !== "") {
-            const p = document.createElement("p");
-            p.innerHTML = `<strong>${key}:</strong> ${row[key]}`;
-            card.appendChild(p);
-          }
-        }
-
-        container.appendChild(card);
-      });
-    }
-
-    // Simple search + size filter
-    document.getElementById("searchInput").addEventListener("input", e => {
-      const term = e.target.value.toLowerCase();
-      const filtered = allProducts.filter(p =>
-        Object.values(p).some(v => v && v.toLowerCase().includes(term))
-      );
-      renderProducts(filtered);
-    });
-
-    document.getElementById("sizeFilter").addEventListener("change", e => {
-      const size = e.target.value;
-      let filtered = allProducts;
-      if (size) {
-        filtered = allProducts.filter(p =>
-          Object.values(p).some(v => v && v.toLowerCase() === size.toLowerCase())
-        );
-      }
-      renderProducts(filtered);
-    });
-
-    document.addEventListener("DOMContentLoaded", loadAllSheets);
-  </script>
+  <!-- Your main JS -->
+  <script src="js/main.js"></script>
 </body>
 </html>
