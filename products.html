@@ -1,44 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop - Hype24/7</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <header>
-    <div class="logo">Hype24/7</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="products.html">Shop</a>
-      <a href="cart.html">Cart</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-  </header>
+document.addEventListener("DOMContentLoaded", () => {
+  const products = [
+    {
+      name: "Product 1",
+      price: "$19.99",
+      image: "https://via.placeholder.com/300x200"
+    },
+    {
+      name: "Product 2",
+      price: "$29.99",
+      image: "https://via.placeholder.com/300x200"
+    },
+    {
+      name: "Product 3",
+      price: "$39.99",
+      image: "https://via.placeholder.com/300x200"
+    }
+  ];
 
-  <section class="featured-products">
-    <h2>Shop Sneakers</h2>
+  const productList = document.getElementById("product-list");
 
-    <!-- Search + filter -->
-    <input type="text" id="search" placeholder="Search sneakers...">
-    <select id="size-filter">
-      <option value="">Filter by size</option>
-    </select>
-
-    <!-- Product grid -->
-    <div class="product-grid" id="product-list">
-      <!-- JS will load products here -->
-    </div>
-  </section>
-
-  <footer>
-    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
-  </footer>
-
-  <!-- JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="js/main.js"></script>
-</body>
-</html>
+  products.forEach(product => {
+    const card = document.createElement("div");
+    card.classList.add("product-card");
+    card.innerHTML = `
+      <img src="${product.image}" alt="${product.name}">
+      <h3>${product.name}</h3>
+      <p class="price">${product.price}</p>
+      <button class="button">Add to Cart</button>
+    `;
+    productList.appendChild(card);
+  });
+});
