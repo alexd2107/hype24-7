@@ -18,17 +18,26 @@
     </nav>
   </header>
 
-  <section class="featured-products">
-    <h2>Our Products</h2>
-    <div class="product-grid" id="product-list">
-      <!-- Product cards will load here -->
-    </div>
-  </section>
+  <main>
+    <section class="featured-products">
+      <h2>Products</h2>
+
+      <!-- Search + Size Filter -->
+      <input type="text" id="search" placeholder="Search products...">
+      <select id="sizeFilter">
+        <option value="">All Sizes</option>
+      </select>
+
+      <!-- Product Grid -->
+      <div class="product-grid" id="product-grid"></div>
+    </section>
+  </main>
 
   <footer>
-    <p>&copy; 2025 My Store. All rights reserved.</p>
+    <p>&copy; 2025 My Store</p>
   </footer>
 
+  <!-- Main script -->
   <script src="js/main.js"></script>
 </body>
 </html>
