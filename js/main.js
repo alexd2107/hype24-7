@@ -1,177 +1,79 @@
-// ===== CONFIG =====
-const SHEETS = [
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
-  // add more sheet links here if needed
+// Google Sheets CSV (published link)
+const sheetUrls = [
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv"
 ];
 
-// ===== GLOBAL STATE =====
-let allProducts = [];
-let filteredProducts = [];
+// Fetch + parse CSV
+async function fetchCSV(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Failed to load CSV: " + url);
+  const text = await response.text();
+  return Papa.parse(text, { header: true }).data;
+}
 
-// ===== FETCH PRODUCTS =====
+// Load products from all sheets
 async function loadProducts() {
-  let results = [];
-
-  for (const url of SHEETS) {
-    const response = await fetch(url);
-    const csv = await response.text();
-    const parsed = Papa.parse(csv, { header: true });
-    results = results.concat(parsed.data.filter(p => p.Name)); // skip empty rows
-  }
-
-  allProducts = results;
-  filteredProducts = [...allProducts];
-
-  if (document.getElementById("product-list")) {
-    renderProducts();
-    populateSizeFilter();
-  }
-
-  if (document.getElementById("product-detail")) {
-    renderSingleProduct();
-  }
-
-  if (document.getElementById("cart-items")) {
-    renderCart();
-  }
-}
-
-// ===== RENDER PRODUCTS (products.html) =====
-function renderProducts() {
-  const container = document.getElementById("product-list");
-  container.innerHTML = "";
-
-  filteredProducts.forEach((p, index) => {
-    const div = document.createElement("div");
-    div.classList.add("product-card");
-
-    div.innerHTML = `
-      <img src="${p.Image || 'https://via.placeholder.com/200'}" alt="${p.Name}">
-      <h3>${p.Name}</h3>
-      <p>$${p.Price}</p>
-      <a href="product.html?id=${index}" class="button">View</a>
-    `;
-
-    container.appendChild(div);
-  });
-}
-
-// ===== SIZE FILTER =====
-function populateSizeFilter() {
-  const select = document.getElementById("size-filter");
-  if (!select) return;
-
-  let sizes = new Set();
-  allProducts.forEach(p => {
-    if (p.Size) {
-      p.Size.split(",").forEach(size => sizes.add(size.trim()));
+  try {
+    let allProducts = [];
+    for (let url of sheetUrls) {
+      const products = await fetchCSV(url);
+      allProducts = allProducts.concat(products);
     }
-  });
+    renderProducts(allProducts);
+    setupFilters(allProducts);
+  } catch (error) {
+    console.error(error);
+    document.getElementById("product-grid").innerHTML = "<p>Error loading products.</p>";
+  }
+}
 
-  sizes = Array.from(sizes).sort();
+// Render products into grid
+function renderProducts(products) {
+  const grid = document.getElementById("product-grid");
+  grid.innerHTML = "";
+
+  products.forEach(p => {
+    if (!p.Name) return; // Skip empty rows
+
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      <img src="${p.Image || 'https://via.placeholder.com/300'}" alt="${p.Name}">
+      <h3>${p.Name}</h3>
+      <p class="price">${p.Price || ''}</p>
+      <p>${p.Size || ''}</p>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// Setup search + size filter
+function setupFilters(products) {
+  const searchInput = document.getElementById("search");
+  const sizeFilter = document.getElementById("sizeFilter");
+
+  // Populate size filter
+  const sizes = [...new Set(products.map(p => p.Size).filter(Boolean))];
   sizes.forEach(size => {
     const option = document.createElement("option");
     option.value = size;
     option.textContent = size;
-    select.appendChild(option);
+    sizeFilter.appendChild(option);
   });
 
-  select.addEventListener("change", applyFilters);
-}
-
-// ===== SEARCH & FILTER =====
-function applyFilters() {
-  const search = document.getElementById("search")?.value.toLowerCase() || "";
-  const size = document.getElementById("size-filter")?.value || "";
-
-  filteredProducts = allProducts.filter(p => {
-    const matchesSearch = p.Name.toLowerCase().includes(search);
-    const matchesSize = size ? (p.Size && p.Size.includes(size)) : true;
-    return matchesSearch && matchesSize;
-  });
-
-  renderProducts();
-}
-
-document.getElementById("search")?.addEventListener("input", applyFilters);
-
-// ===== SINGLE PRODUCT PAGE (product.html) =====
-function renderSingleProduct() {
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
-
-  if (!id || !allProducts[id]) return;
-
-  const p = allProducts[id];
-  const container = document.getElementById("product-detail");
-
-  container.innerHTML = `
-    <img src="${p.Image || 'https://via.placeholder.com/400'}" alt="${p.Name}">
-    <div>
-      <h2>${p.Name}</h2>
-      <p>Price: $${p.Price}</p>
-      <p>Available Sizes: ${p.Size || "N/A"}</p>
-      <button onclick="addToCart(${id})" class="button">Add to Cart</button>
-    </div>
-  `;
-}
-
-// ===== CART FUNCTIONS =====
-function getCart() {
-  return JSON.parse(localStorage.getItem("cart") || "[]");
-}
-
-function saveCart(cart) {
-  localStorage.setItem("cart", JSON.stringify(cart));
-}
-
-function addToCart(id) {
-  const product = allProducts[id];
-  let cart = getCart();
-  cart.push(product);
-  saveCart(cart);
-  alert("Added to cart!");
-}
-
-function renderCart() {
-  const container = document.getElementById("cart-items");
-  const cart = getCart();
-
-  if (cart.length === 0) {
-    container.innerHTML = "<p>Your cart is empty.</p>";
-    return;
+  function applyFilters() {
+    const search = searchInput.value.toLowerCase();
+    const size = sizeFilter.value;
+    const filtered = products.filter(p =>
+      (!search || p.Name?.toLowerCase().includes(search)) &&
+      (!size || p.Size === size)
+    );
+    renderProducts(filtered);
   }
 
-  container.innerHTML = "";
-  let total = 0;
-
-  cart.forEach((p, index) => {
-    total += parseFloat(p.Price || 0);
-
-    const div = document.createElement("div");
-    div.classList.add("cart-item");
-    div.innerHTML = `
-      <img src="${p.Image || 'https://via.placeholder.com/100'}" alt="${p.Name}">
-      <span>${p.Name}</span>
-      <span>$${p.Price}</span>
-      <button onclick="removeFromCart(${index})">Remove</button>
-    `;
-    container.appendChild(div);
-  });
-
-  const totalDiv = document.createElement("div");
-  totalDiv.classList.add("cart-total");
-  totalDiv.innerHTML = `<h3>Total: $${total.toFixed(2)}</h3>`;
-  container.appendChild(totalDiv);
+  searchInput.addEventListener("input", applyFilters);
+  sizeFilter.addEventListener("change", applyFilters);
 }
 
-function removeFromCart(index) {
-  let cart = getCart();
-  cart.splice(index, 1);
-  saveCart(cart);
-  renderCart();
-}
-
-// ===== INIT =====
-window.addEventListener("DOMContentLoaded", loadProducts);
-
+document.addEventListener("DOMContentLoaded", loadProducts);
