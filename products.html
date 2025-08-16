@@ -40,15 +40,18 @@
     <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
   </footer>
 
-  <!-- PapaParse -->
+    <!-- PapaParse (must load first) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script>
-    const productGrid = document.getElementById('product-grid');
-    const searchInput = document.getElementById('search');
-    const sizeFilter = document.getElementById('sizeFilter');
 
-    const sheetUrls = [
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+  <!-- Our script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const productGrid = document.getElementById('product-grid');
+      const searchInput = document.getElementById('search');
+      const sizeFilter = document.getElementById('sizeFilter');
+
+      const sheetUrls = [
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
@@ -61,54 +64,55 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
-    let allProducts = [];
+      let allProducts = [];
 
-    function renderProducts(products) {
-      productGrid.innerHTML = "";
-      if (!products.length) {
-        productGrid.innerHTML = "<p>No products found.</p>";
-        return;
+      function renderProducts(products) {
+        productGrid.innerHTML = "";
+        if (!products.length) {
+          productGrid.innerHTML = "<p>No products found.</p>";
+          return;
+        }
+        products.forEach(p => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.innerHTML = `
+            <h3>${p.Name || "Unnamed Product"}</h3>
+            <p>${p.Description || ""}</p>
+            <p class="price">${p.Price ? "$" + p.Price : ""}</p>
+            <p>${p.Size ? "Size: " + p.Size : ""}</p>
+          `;
+          productGrid.appendChild(card);
+        });
       }
-      products.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.innerHTML = `
-          <h3>${p.Name || "Unnamed Product"}</h3>
-          <p>${p.Description || ""}</p>
-          <p class="price">${p.Price ? "$" + p.Price : ""}</p>
-          <p>${p.Size ? "Size: " + p.Size : ""}</p>
-        `;
-        productGrid.appendChild(card);
-      });
-    }
 
-    function applyFilters() {
-      const query = searchInput.value.toLowerCase();
-      const size = sizeFilter.value;
-      const filtered = allProducts.filter(p => {
-        const matchesSearch = p.Name?.toLowerCase().includes(query) || p.Description?.toLowerCase().includes(query);
-        const matchesSize = !size || (p.Size && p.Size.toUpperCase() === size.toUpperCase());
-        return matchesSearch && matchesSize;
-      });
-      renderProducts(filtered);
-    }
+      function applyFilters() {
+        const query = searchInput.value.toLowerCase();
+        const size = sizeFilter.value;
+        const filtered = allProducts.filter(p => {
+          const matchesSearch = p.Name?.toLowerCase().includes(query) || p.Description?.toLowerCase().includes(query);
+          const matchesSize = !size || (p.Size && p.Size.toUpperCase() === size.toUpperCase());
+          return matchesSearch && matchesSize;
+        });
+        renderProducts(filtered);
+      }
 
-    async function loadAllCSVs() {
-      for (const url of sheetUrls) {
-        await fetch(url)
-          .then(res => res.text())
-          .then(csv => {
+      async function loadAllCSVs() {
+        for (const url of sheetUrls) {
+          try {
+            const res = await fetch(url);
+            const csv = await res.text();
             const parsed = Papa.parse(csv, { header: true }).data;
             allProducts = allProducts.concat(parsed);
-          });
+          } catch (err) {
+            console.error("Error fetching sheet:", url, err);
+          }
+        }
+        renderProducts(allProducts);
       }
-      renderProducts(allProducts);
-    }
 
-    searchInput.addEventListener("input", applyFilters);
-    sizeFilter.addEventListener("change", applyFilters);
+      searchInput.addEventListener("input", applyFilters);
+      sizeFilter.addEventListener("change", applyFilters);
 
-    loadAllCSVs();
+      loadAllCSVs();
+    });
   </script>
-</body>
-</html>
