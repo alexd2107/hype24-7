@@ -3,8 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hype24/7</title>
+  <title>Hype24/7 - Home</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f9f9f9; }
+    header { background: #111; color: white; padding: 1rem; text-align: center; }
+    nav a { color: white; margin: 0 10px; text-decoration: none; }
+
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: #eee;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .card h3 { margin: 10px 0; font-size: 18px; }
+    .card p { margin: 5px 0; color: #555; }
+
+    footer { text-align: center; padding: 1rem; background: #111; color: white; }
+  </style>
 </head>
 <body>
   <header>
@@ -16,66 +47,60 @@
     </nav>
   </header>
 
-  <main>
-    <section class="hero">
-      <h1>Welcome to Hype24/7</h1>
-      <p>Your spot for exclusive drops & rare finds</p>
-      <a href="products.html" class="btn">Shop Now</a>
-    </section>
+  <section class="hero">
+    <h1>Welcome to Hype24/7</h1>
+    <p>Your 24/7 source for exclusive streetwear & sneakers.</p>
+  </section>
 
-    <section class="featured">
-      <h2>Featured Products</h2>
-      <div id="featured-products" class="product-grid"></div>
-      <div class="view-all">
-        <a href="products.html" class="btn">View All Products</a>
-      </div>
-    </section>
-  </main>
+  <section>
+    <h2 style="text-align:center; margin-top:2rem;">Featured Products</h2>
+    <div id="featured" class="products"></div>
+  </section>
 
-  <footer>
-    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
-  </footer>
+  <footer><p>&copy; 2025 Hype24/7</p></footer>
 
-  <!-- PapaParse for CSV parsing -->
+  <!-- PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
- <script>
-  const featuredSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv";
+  <script>
+    const urls = [
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv"
+    ];
 
-  async function loadFeatured() {
-    const container = document.getElementById("featured-products");
-    container.innerHTML = ""; // clear
+    async function loadFeatured() {
+      const promises = urls.map(url => new Promise(res => {
+        Papa.parse(url, {
+          download: true, header: true,
+          complete: r => res(r.data)
+        });
+      }));
 
-    try {
-      const response = await fetch(featuredSheetUrl);
-      const csvText = await response.text();
+      const results = await Promise.all(promises);
+      const products = results.flat().filter(p => p.Name);
 
-      Papa.parse(csvText, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
-          console.log("Parsed data:", results);
-
-          const rows = results.data.slice(0, 8); // show first 8 products
-          rows.forEach(row => {
-            const card = document.createElement("div");
-            card.className = "product-card";
-
-            card.innerHTML = `
-              <div class="product-info">
-                <h3>${row.Name || "Unnamed Product"}</h3>
-                <p class="price">${row.Price || "Price on request"}</p>
-                <p class="size">Size: ${row.Size || "N/A"}</p>
-              </div>
-            `;
-
-            container.appendChild(card);
-          });
-        }
-      });
-    } catch (err) {
-      console.error("Error fetching featured sheet:", err);
+      // Pick first 6 as "featured"
+      const featured = products.slice(0, 6);
+      render(featured);
     }
-  }
 
-  document.addEventListener("DOMContentLoaded", loadFeatured);
-</script>
+    function render(list) {
+      const container = document.getElementById("featured");
+      container.innerHTML = "";
+      list.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${p.Name}</h3>
+          <p>${p.Brand || ""}</p>
+          <p>Size: ${p.Size || "N/A"}</p>
+          <p>${p.Price || "Price on request"}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    loadFeatured();
+  </script>
+</body>
+</html>
