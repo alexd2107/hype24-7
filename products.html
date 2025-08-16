@@ -4,35 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shop - Hype24/7</title>
-  <link rel="stylesheet" href="css/style.css">
-
+  <link rel="stylesheet" href="style.css">
   <style>
-    /* Card grid styling */
-    .product-grid {
+    body { font-family: Arial, sans-serif; margin: 0; background: #f9f9f9; }
+    header { background: #111; color: white; padding: 1rem; text-align: center; }
+    nav a { color: white; margin: 0 10px; text-decoration: none; }
+
+    .filters { text-align: center; padding: 1rem; }
+    .filters input, .filters select {
+      padding: 8px; margin: 5px;
+      border: 1px solid #ccc; border-radius: 5px;
+    }
+
+    .products {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px;
-      padding: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px; padding: 20px;
     }
 
-    .product-card {
-      border: 1px solid #ddd;
+    .card {
+      background: white; padding: 15px;
       border-radius: 10px;
-      padding: 15px;
-      background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    .product-card h3 {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    .product-card p {
-      margin: 5px 0;
-      color: #444;
-    }
+    .card h3 { margin: 10px 0; font-size: 18px; }
+    .card p { margin: 5px 0; color: #555; }
   </style>
 </head>
 <body>
@@ -45,22 +43,23 @@
     </nav>
   </header>
 
-  <main>
-    <h1 style="text-align:center; margin-top:20px;">Shop All Products</h1>
-    <div class="product-grid" id="product-grid">
-      <!-- JS will inject product cards here -->
-    </div>
-  </main>
+  <section class="filters">
+    <input type="text" id="search" placeholder="Search...">
+    <select id="sizeFilter">
+      <option value="">All Sizes</option>
+      <option>S</option><option>M</option><option>L</option>
+      <option>XL</option><option>XXL</option>
+    </select>
+  </section>
 
-  <footer>
-    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
-  </footer>
+  <section id="products" class="products"></section>
+
+  <footer><p>&copy; 2025 Hype24/7</p></footer>
 
   <!-- PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
   <script>
-    const sheetUrls = [
+    const urls = [
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
@@ -74,45 +73,50 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
-    const productGrid = document.getElementById("product-grid");
+    let products = [];
 
-    function loadSheet(url) {
-      return new Promise((resolve, reject) => {
+    async function loadAll() {
+      const promises = urls.map(url => new Promise(res => {
         Papa.parse(url, {
-          download: true,
-          header: true,
-          complete: results => resolve(results.data),
-          error: err => reject(err)
+          download: true, header: true,
+          complete: r => res(r.data)
         });
+      }));
+      const results = await Promise.all(promises);
+      products = results.flat().filter(p => p.Name);
+      render(products);
+    }
+
+    function render(list) {
+      const container = document.getElementById("products");
+      container.innerHTML = "";
+      list.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${p.Name}</h3>
+          <p>${p.Brand || ""}</p>
+          <p>Size: ${p.Size || "N/A"}</p>
+          <p>${p.Price || "Price on request"}</p>
+        `;
+        container.appendChild(card);
       });
     }
 
-    async function loadAllSheets() {
-      for (const url of sheetUrls) {
-        try {
-          const products = await loadSheet(url);
+    document.getElementById("search").addEventListener("input", e => {
+      const t = e.target.value.toLowerCase();
+      render(products.filter(p =>
+        (p.Name && p.Name.toLowerCase().includes(t)) ||
+        (p.Brand && p.Brand.toLowerCase().includes(t))
+      ));
+    });
 
-          products.forEach(product => {
-            if (product.Name || product.Size || product.Price) {
-              const card = document.createElement("div");
-              card.className = "product-card";
+    document.getElementById("sizeFilter").addEventListener("change", e => {
+      const s = e.target.value;
+      render(s ? products.filter(p => p.Size === s) : products);
+    });
 
-              card.innerHTML = `
-                <h3>${product.Name || "Unnamed Product"}</h3>
-                <p><strong>Size:</strong> ${product.Size || "N/A"}</p>
-                <p><strong>Price:</strong> ${product.Price || "On Request"}</p>
-              `;
-
-              productGrid.appendChild(card);
-            }
-          });
-        } catch (error) {
-          console.error("Error fetching sheet:", url, error);
-        }
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", loadAllSheets);
+    loadAll();
   </script>
 </body>
 </html>
