@@ -3,64 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products - Hype24/7</title>
-  <link rel="stylesheet" href="style.css">
-
-  <!-- PapaParse (must come before our script) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <title>Shop - Hype24/7</title>
+  <link rel="stylesheet" href="css/style.css">
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f8f8f8;
-    }
-    header {
-      background: #111;
-      color: #fff;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header .logo {
-      font-weight: bold;
-      font-size: 20px;
-    }
-    header nav a {
-      color: #fff;
-      margin-left: 15px;
-      text-decoration: none;
-    }
-    .products-container {
+    /* Card grid styling */
+    .product-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 20px;
       padding: 20px;
     }
+
     .product-card {
-      background: #fff;
+      border: 1px solid #ddd;
       border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       padding: 15px;
+      background: #fff;
       text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
+
     .product-card h3 {
-      margin: 0 0 10px;
       font-size: 18px;
-      color: #333;
+      margin-bottom: 10px;
     }
+
     .product-card p {
       margin: 5px 0;
-      color: #555;
-    }
-    footer {
-      text-align: center;
-      padding: 20px;
-      background: #111;
-      color: #fff;
-      margin-top: 20px;
+      color: #444;
     }
   </style>
 </head>
@@ -75,12 +46,18 @@
   </header>
 
   <main>
-    <div class="products-container" id="products"></div>
+    <h1 style="text-align:center; margin-top:20px;">Shop All Products</h1>
+    <div class="product-grid" id="product-grid">
+      <!-- JS will inject product cards here -->
+    </div>
   </main>
 
   <footer>
     <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
   </footer>
+
+  <!-- PapaParse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
   <script>
     const sheetUrls = [
@@ -97,7 +74,7 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
-    const productsContainer = document.getElementById("products");
+    const productGrid = document.getElementById("product-grid");
 
     function loadSheet(url) {
       return new Promise((resolve, reject) => {
@@ -111,31 +88,28 @@
     }
 
     async function loadAllSheets() {
-      let allProducts = [];
       for (const url of sheetUrls) {
         try {
-          const data = await loadSheet(url);
-          allProducts = allProducts.concat(data);
-        } catch (err) {
-          console.error("Error fetching sheet:", url, err);
+          const products = await loadSheet(url);
+
+          products.forEach(product => {
+            if (product.Name || product.Size || product.Price) {
+              const card = document.createElement("div");
+              card.className = "product-card";
+
+              card.innerHTML = `
+                <h3>${product.Name || "Unnamed Product"}</h3>
+                <p><strong>Size:</strong> ${product.Size || "N/A"}</p>
+                <p><strong>Price:</strong> ${product.Price || "On Request"}</p>
+              `;
+
+              productGrid.appendChild(card);
+            }
+          });
+        } catch (error) {
+          console.error("Error fetching sheet:", url, error);
         }
       }
-      displayProducts(allProducts);
-    }
-
-    function displayProducts(products) {
-      productsContainer.innerHTML = "";
-      products.forEach(row => {
-        if (!row.name) return; // skip empty rows
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.innerHTML = `
-          <h3>${row.name || "Unnamed Product"}</h3>
-          <p>Size: ${row.size || "N/A"}</p>
-          <p>Price: ${row.price || "Price on Request"}</p>
-        `;
-        productsContainer.appendChild(card);
-      });
     }
 
     document.addEventListener("DOMContentLoaded", loadAllSheets);
