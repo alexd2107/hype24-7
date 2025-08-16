@@ -3,77 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hype24/7 Inventory</title>
+  <title>Hype24/7</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
+      margin: 0;
       background: #111;
       color: #fff;
     }
-    h1 {
+
+    nav {
+      background: #000;
+      padding: 15px;
       text-align: center;
-      margin-bottom: 20px;
     }
-    .controls {
-      margin-bottom: 20px;
+    nav a {
+      color: #fff;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    header {
+      height: 80vh;
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
+      background: url('banner-image.jpg') center/cover no-repeat;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
+    header a {
+      margin-top: 20px;
+      background: #ff4500;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1.2rem;
+    }
+
+    /* Shop Section */
+    #shop {
+      padding: 40px 20px;
+    }
+    #shop h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2rem;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
     input, select {
       padding: 8px;
       border-radius: 6px;
       border: none;
-      font-size: 14px;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
       background: #222;
-    }
-    th, td {
-      border: 1px solid #444;
-      padding: 8px;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.4);
       text-align: center;
+      transition: transform 0.2s;
     }
-    th {
-      background-color: #333;
-      color: #fff;
+    .card:hover {
+      transform: scale(1.05);
     }
-    tr:nth-child(even) {
-      background-color: #2a2a2a;
+    .card h3 {
+      margin: 10px 0;
+    }
+    .price {
+      color: #ff4500;
+      font-weight: bold;
+      margin-top: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>Live Sneaker Inventory</h1>
 
-  <!-- Search + Filters -->
-  <div class="controls">
-    <input type="text" id="search" placeholder="Search sneakers...">
-    <select id="sizeFilter">
-      <option value="">All Sizes</option>
-    </select>
-    <select id="priceFilter">
-      <option value="">All Prices</option>
-      <option value="0-200">$0 - $200</option>
-      <option value="200-400">$200 - $400</option>
-      <option value="400-600">$400 - $600</option>
-      <option value="600+">$600+</option>
-    </select>
-  </div>
+  <!-- Navbar -->
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#shop">Shop</a>
+  </nav>
 
-  <!-- Table -->
-  <table id="inventory"></table>
+  <!-- Hero -->
+  <header id="home">
+    <h1>Welcome to Hype24/7</h1>
+    <a href="#shop">Shop Now</a>
+  </header>
+
+  <!-- Shop Section -->
+  <section id="shop">
+    <h2>Our Inventory</h2>
+
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search sneakers...">
+      <select id="sizeFilter">
+        <option value="">All Sizes</option>
+      </select>
+      <select id="priceFilter">
+        <option value="">All Prices</option>
+        <option value="0-200">$0 - $200</option>
+        <option value="200-400">$200 - $400</option>
+        <option value="400-600">$400 - $600</option>
+        <option value="600+">$600+</option>
+      </select>
+    </div>
+
+    <div class="grid" id="inventory"></div>
+  </section>
 
   <script>
     let inventoryData = [];
     
     async function loadInventory() {
-      // 🔗 Replace with your actual published Google Sheets CSV link
-      const url = " https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv;
+      // 🔗 Replace with your published Google Sheets CSV link
+      const url = "PASTE-YOUR-PUBLISHED-SHEET-LINK-HERE";
       const response = await fetch(url);
       const data = await response.text();
       const rows = data.split("\n").map(r => r.split(","));
@@ -86,25 +150,23 @@
       });
 
       populateSizeFilter();
-      renderTable(inventoryData);
+      renderCards(inventoryData);
     }
 
-    function renderTable(data) {
-      let table = "<tr>";
-      Object.keys(inventoryData[0]).forEach(header => {
-        table += `<th>${header}</th>`;
-      });
-      table += "</tr>";
+    function renderCards(data) {
+      let container = document.getElementById("inventory");
+      container.innerHTML = "";
 
       data.forEach(item => {
-        table += "<tr>";
-        Object.values(item).forEach(cell => {
-          table += `<td>${cell}</td>`;
-        });
-        table += "</tr>";
+        let card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${item["Model"] || "Sneaker"}</h3>
+          <p>Size: ${item["Size"] || "-"}</p>
+          <p class="price">$${item["Price"] || "N/A"}</p>
+        `;
+        container.appendChild(card);
       });
-
-      document.getElementById("inventory").innerHTML = table;
     }
 
     function populateSizeFilter() {
@@ -146,7 +208,7 @@
         return matchesSearch && matchesSize && matchesPrice;
       });
 
-      renderTable(filtered);
+      renderCards(filtered);
     }
 
     document.getElementById("search").addEventListener("input", applyFilters);
@@ -157,6 +219,3 @@
   </script>
 </body>
 </html>
-
-
-
