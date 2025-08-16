@@ -3,35 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop - Hype24/7</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Products - Hype24/7</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- PapaParse (must come before our script) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8f8f8;
+    }
+    header {
+      background: #111;
+      color: #fff;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header .logo {
+      font-weight: bold;
+      font-size: 20px;
+    }
+    header nav a {
+      color: #fff;
+      margin-left: 15px;
+      text-decoration: none;
+    }
+    .products-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 15px;
+      text-align: center;
+    }
+    .product-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: #333;
+    }
+    .product-card p {
+      margin: 5px 0;
+      color: #555;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #111;
+      color: #fff;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
   <header>
     <div class="logo">Hype24/7</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="products.html" class="active">Shop</a>
+      <a href="products.html">Shop</a>
       <a href="about.html">About</a>
     </nav>
   </header>
 
   <main>
-    <section>
-      <h2 style="text-align:center; margin-top:20px;">Shop All</h2>
-
-      <!-- Filter Bar -->
-      <div class="filter-bar">
-        <label for="size-filter">Filter by Size:</label>
-        <select id="size-filter">
-          <option value="all">All</option>
-        </select>
-      </div>
-
-      <!-- Products -->
-      <div id="all-products" class="products-grid"></div>
-    </section>
+    <div class="products-container" id="products"></div>
   </main>
 
   <footer>
@@ -53,77 +97,46 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
-    let allProducts = [];
+    const productsContainer = document.getElementById("products");
+
+    function loadSheet(url) {
+      return new Promise((resolve, reject) => {
+        Papa.parse(url, {
+          download: true,
+          header: true,
+          complete: results => resolve(results.data),
+          error: err => reject(err)
+        });
+      });
+    }
 
     async function loadAllSheets() {
-      const container = document.getElementById("all-products");
-      container.innerHTML = "";
-      allProducts = []; // reset for fresh load
-
+      let allProducts = [];
       for (const url of sheetUrls) {
         try {
-          const response = await fetch(url);
-          const csvText = await response.text();
-
-          Papa.parse(csvText, {
-            header: true,
-            skipEmptyLines: true,
-            complete: (results) => {
-              results.data.forEach(row => {
-                allProducts.push(row);
-              });
-              renderProducts(allProducts);
-              updateSizeFilter();
-            }
-          });
+          const data = await loadSheet(url);
+          allProducts = allProducts.concat(data);
         } catch (err) {
           console.error("Error fetching sheet:", url, err);
         }
       }
+      displayProducts(allProducts);
     }
 
-    function renderProducts(products) {
-      const container = document.getElementById("all-products");
-      container.innerHTML = "";
-
+    function displayProducts(products) {
+      productsContainer.innerHTML = "";
       products.forEach(row => {
+        if (!row.name) return; // skip empty rows
         const card = document.createElement("div");
         card.className = "product-card";
-
         card.innerHTML = `
-          <div class="product-info">
-            <h3>${row.Name || "Unnamed Product"}</h3>
-            <p class="price">${row.Price || "Price on request"}</p>
-            <p class="size">Size: ${row.Size || "N/A"}</p>
-          </div>
+          <h3>${row.name || "Unnamed Product"}</h3>
+          <p>Size: ${row.size || "N/A"}</p>
+          <p>Price: ${row.price || "Price on Request"}</p>
         `;
-
-        container.appendChild(card);
+        productsContainer.appendChild(card);
       });
     }
-
-    function updateSizeFilter() {
-      const sizeFilter = document.getElementById("size-filter");
-      const sizes = [...new Set(allProducts.map(p => p.Size).filter(s => s))];
-
-      // reset dropdown
-      sizeFilter.innerHTML = `<option value="all">All</option>`;
-      sizes.forEach(size => {
-        const option = document.createElement("option");
-        option.value = size;
-        option.textContent = size;
-        sizeFilter.appendChild(option);
-      });
-    }
-
-    document.getElementById("size-filter").addEventListener("change", (e) => {
-      const value = e.target.value;
-      if (value === "all") {
-        renderProducts(allProducts);
-      } else {
-        renderProducts(allProducts.filter(p => p.Size === value));
-      }
-    });
 
     document.addEventListener("DOMContentLoaded", loadAllSheets);
   </script>
