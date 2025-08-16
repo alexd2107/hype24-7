@@ -4,31 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shop - Hype24/7</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <header>
     <div class="logo">Hype24/7</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="products.html">Shop</a>
+      <a href="products.html" class="active">Shop</a>
       <a href="about.html">About</a>
     </nav>
   </header>
 
   <main>
-    <h1>Shop</h1>
-    <div id="product-list" class="product-grid"></div>
+    <section>
+      <h2 style="text-align:center; margin-top:20px;">Shop All</h2>
+      <div id="all-products" class="products-grid">
+        <!-- Cards injected here -->
+      </div>
+    </section>
   </main>
 
   <footer>
     <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
   </footer>
 
-  <!-- PapaParse for CSV parsing -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
-    // All your sheet URLs
     const sheetUrls = [
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
@@ -44,7 +46,8 @@
     ];
 
     async function loadAllSheets() {
-      const container = document.getElementById("product-list");
+      const container = document.getElementById("all-products");
+      container.innerHTML = "";
 
       for (const url of sheetUrls) {
         try {
@@ -53,19 +56,20 @@
 
           Papa.parse(csvText, {
             header: true,
+            skipEmptyLines: true,
             complete: (results) => {
               results.data.forEach(row => {
                 const card = document.createElement("div");
                 card.className = "product-card";
 
-                let details = "";
-                for (let key in row) {
-                  if (row[key] && row[key].trim() !== "") {
-                    details += `<p><strong>${key}:</strong> ${row[key]}</p>`;
-                  }
-                }
+                card.innerHTML = `
+                  <div class="product-info">
+                    <h3>${row.Name || "Unnamed Product"}</h3>
+                    <p class="price">${row.Price || "Price on request"}</p>
+                    <p class="size">Size: ${row.Size || "N/A"}</p>
+                  </div>
+                `;
 
-                card.innerHTML = `<div class="product-info">${details}</div>`;
                 container.appendChild(card);
               });
             }
