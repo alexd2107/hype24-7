@@ -65,15 +65,13 @@
 
         const price = product.Price || product.Cost || product.Amount || "";
         const size = product.Size || product.Sizes || "";
-        const image = product.Image || product.Photo || "";
 
         const card = document.createElement("div");
         card.className = "product-card";
         card.innerHTML = `
-          <img src="${image || 'placeholder.jpg'}" alt="${name}">
           <h3>${name}</h3>
-          <p class="price">${price}</p>
-          <p>${size}</p>
+          ${price ? `<p class="price">${price}</p>` : ""}
+          ${size ? `<p>${size}</p>` : ""}
         `;
         container.appendChild(card);
       });
