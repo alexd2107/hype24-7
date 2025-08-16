@@ -1,72 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Products - Hype24/7</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- PapaParse for CSV parsing -->
+  <meta charset="UTF-8">
+  <title>Products</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    #controls { margin-bottom: 20px; display: flex; gap: 10px; }
+    #search { padding: 5px; width: 200px; }
+    #sizeFilter { padding: 5px; }
+    .product {
+      background: white; border-radius: 8px; padding: 15px; margin: 10px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .product h3 { margin: 0; font-size: 18px; }
+    .product p { margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Shop Inventory</h1>
+
+  <!-- Search and Filter Controls -->
+  <div id="controls">
+    <input type="text" id="search" placeholder="Search by name...">
+    <select id="sizeFilter">
+      <option value="">All Sizes</option>
+    </select>
+  </div>
+
+  <!-- Product List -->
+  <div id="product-list"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
   <script>
-  const sheetLinks = [
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
-  ];
+    // All your sheet CSVs
+    const urls = [
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
+    ];
 
-  async function loadAllSheets() {
-    const allRows = [];
+    let inventory = [];
 
-    for (const url of sheetLinks) {
-      try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const parsed = Papa.parse(text, { header: true });
-        
-        parsed.data.forEach(row => {
-          // only add rows with at least one non-empty field
-          if (Object.values(row).some(v => v && v.trim() !== "")) {
-            allRows.push(row);
-          }
-        });
-      } catch (err) {
-        console.error("Error fetching sheet:", url, err);
-      }
+    function loadInventory() {
+      Promise.all(urls.map(url =>
+        fetch(url)
+          .then(r => r.text())
+          .then(csv => new Promise(resolve => {
+            Papa.parse(csv, {
+              header: true,
+              skipEmptyLines: true,
+              complete: results => resolve(results.data)
+            });
+          }))
+      )).then(allData => {
+        inventory = [].concat(...allData);
+        populateSizeFilter();
+        renderProducts(inventory);
+      });
     }
 
-    renderProducts(allRows);
-  }
+    function renderProducts(data) {
+      const list = document.getElementById("product-list");
+      list.innerHTML = "";
+      data.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <h3>${item.name || "Unnamed"}</h3>
+          <p><strong>Size:</strong> ${item.size || "N/A"}</p>
+          <p><strong>Price:</strong> ${item.price || "N/A"}</p>
+        `;
+        list.appendChild(div);
+      });
+    }
 
-  function renderProducts(products) {
-    const container = document.getElementById("product-list");
-    container.innerHTML = "";
+    function populateSizeFilter() {
+      const sizeFilter = document.getElementById("sizeFilter");
+      const sizes = [...new Set(
+        inventory.flatMap(i => i.size ? i.size.split(/[,/ ]+/) : [])
+      )].sort();
+      sizes.forEach(size => {
+        const option = document.createElement("option");
+        option.value = size;
+        option.textContent = size;
+        sizeFilter.appendChild(option);
+      });
+    }
 
-    products.forEach(product => {
-      const card = document.createElement("div");
-      card.className = "product-card";
+    function applyFilters() {
+      const search = document.getElementById("search").value.toLowerCase();
+      const size = document.getElementById("sizeFilter").value;
+      const filtered = inventory.filter(item => {
+        const matchesSearch = item.name?.toLowerCase().includes(search);
+        const matchesSize = !size || (item.size && item.size.split(/[,/ ]+/).includes(size));
+        return matchesSearch && matchesSize;
+      });
+      renderProducts(filtered);
+    }
 
-      let content = "";
-      for (const key in product) {
-        if (product[key] && product[key].trim() !== "") {
-          content += `<p><strong>${key}:</strong> ${product[key]}</p>`;
-        }
-      }
+    document.getElementById("search").addEventListener("input", applyFilters);
+    document.getElementById("sizeFilter").addEventListener("change", applyFilters);
 
-      card.innerHTML = content;
-      container.appendChild(card);
-    });
-  }
+    loadInventory();
+  </script>
 
-  document.addEventListener("DOMContentLoaded", loadAllSheets);
-</script>
 </body>
 </html>
-
-
