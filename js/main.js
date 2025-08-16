@@ -1,74 +1,99 @@
-// Google Sheets CSV (published link)
+// ========================
+// CONFIG: Add your CSV sheet URLs here
+// ========================
 const sheetUrls = [
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv"
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv"
+  // 👆 add more GIDs as needed
 ];
 
-// Fetch + parse CSV
-async function fetchCSV(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Failed to load CSV: " + url);
-  const text = await response.text();
-  return Papa.parse(text, { header: true }).data;
-}
+let allProducts = [];
 
-// Load products from all sheets
+// ========================
+// Fetch + Parse CSVs
+// ========================
 async function loadProducts() {
-  try {
-    let allProducts = [];
-    for (let url of sheetUrls) {
-      const products = await fetchCSV(url);
-      allProducts = allProducts.concat(products);
-    }
-    renderProducts(allProducts);
-    setupFilters(allProducts);
-  } catch (error) {
-    console.error(error);
-    document.getElementById("product-grid").innerHTML = "<p>Error loading products.</p>";
-  }
+  const fetches = sheetUrls.map(url =>
+    fetch(url)
+      .then(res => res.text())
+      .then(csv => new Promise((resolve, reject) => {
+        Papa.parse(csv, {
+          header: true,
+          skipEmptyLines: true,
+          complete: results => resolve(results.data),
+          error: err => reject(err)
+        });
+      }))
+      .catch(err => {
+        console.error("Error fetching sheet:", url, err);
+        return [];
+      })
+  );
+
+  const results = await Promise.all(fetches);
+  allProducts = results.flat(); // merge all sheets into one list
+
+  renderProducts(allProducts);
+  populateSizeFilter(allProducts);
 }
 
-// Render products into grid
+// ========================
+// Render Products
+// ========================
 function renderProducts(products) {
   const grid = document.getElementById("product-grid");
+  if (!grid) return;
+
   grid.innerHTML = "";
 
+  if (products.length === 0) {
+    grid.innerHTML = "<p>No products found.</p>";
+    return;
+  }
+
   products.forEach(p => {
-    if (!p.Name) return; // Skip empty rows
+    const sizes = p.Size ? p.Size.split(",").map(s => s.trim()).join(", ") : "N/A";
 
     const card = document.createElement("div");
     card.className = "product-card";
+
     card.innerHTML = `
-      <img src="${p.Image || 'https://via.placeholder.com/300'}" alt="${p.Name}">
-      <h3>${p.Name}</h3>
-      <p class="price">${p.Price || ''}</p>
-      <p>${p.Size || ''}</p>
+      <img src="${p.Image || "https://via.placeholder.com/300"}" alt="${p.Name || "Product"}" />
+      <h3>${p.Name || "Unnamed Product"}</h3>
+      <p class="price">${p.Price ? `$${p.Price}` : "Price not available"}</p>
+      <p>Sizes: ${sizes}</p>
     `;
+
     grid.appendChild(card);
   });
 }
 
-// Setup search + size filter
-function setupFilters(products) {
-  const searchInput = document.getElementById("search");
+// ========================
+// Search + Filter
+// ========================
+function setupSearchAndFilter() {
+  const searchInput = document.getElementById("searchInput");
   const sizeFilter = document.getElementById("sizeFilter");
 
-  // Populate size filter
-  const sizes = [...new Set(products.map(p => p.Size).filter(Boolean))];
-  sizes.forEach(size => {
-    const option = document.createElement("option");
-    option.value = size;
-    option.textContent = size;
-    sizeFilter.appendChild(option);
-  });
+  if (!searchInput || !sizeFilter) return;
 
   function applyFilters() {
-    const search = searchInput.value.toLowerCase();
-    const size = sizeFilter.value;
-    const filtered = products.filter(p =>
-      (!search || p.Name?.toLowerCase().includes(search)) &&
-      (!size || p.Size === size)
-    );
+    const query = searchInput.value.toLowerCase();
+    const selectedSize = sizeFilter.value;
+
+    const filtered = allProducts.filter(p => {
+      const matchesSearch = p.Name?.toLowerCase().includes(query);
+
+      let matchesSize = true;
+      if (selectedSize) {
+        const sizes = p.Size ? p.Size.split(",").map(s => s.trim().toLowerCase()) : [];
+        matchesSize = sizes.includes(selectedSize.toLowerCase());
+      }
+
+      return matchesSearch && matchesSize;
+    });
+
     renderProducts(filtered);
   }
 
@@ -76,4 +101,31 @@ function setupFilters(products) {
   sizeFilter.addEventListener("change", applyFilters);
 }
 
-document.addEventListener("DOMContentLoaded", loadProducts);
+function populateSizeFilter(products) {
+  const sizeFilter = document.getElementById("sizeFilter");
+  if (!sizeFilter) return;
+
+  // Flatten all sizes into a single unique list
+  let sizes = [];
+  products.forEach(p => {
+    if (p.Size) {
+      const splitSizes = p.Size.split(",").map(s => s.trim());
+      sizes = sizes.concat(splitSizes);
+    }
+  });
+
+  sizes = [...new Set(sizes.filter(Boolean))].sort();
+
+  sizeFilter.innerHTML = `<option value="">All Sizes</option>`;
+  sizes.forEach(size => {
+    sizeFilter.innerHTML += `<option value="${size}">${size}</option>`;
+  });
+}
+
+// ========================
+// Init
+// ========================
+document.addEventListener("DOMContentLoaded", () => {
+  loadProducts();
+  setupSearchAndFilter();
+});
