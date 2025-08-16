@@ -3,34 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Shop - Hype24/7</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header>
-    <div class="logo">My Shop</div>
+    <div class="logo">Hype24/7</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="products.html">Products</a>
+      <a href="products.html">Shop</a>
+      <a href="cart.html">Cart</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
-      <a href="cart.html">Cart</a>
     </nav>
   </header>
 
   <section class="featured-products">
-    <h2>All Products</h2>
-    <div id="product-list" class="product-grid"></div>
+    <h2>Shop Sneakers</h2>
+
+    <!-- Search + filter -->
+    <input type="text" id="search" placeholder="Search sneakers...">
+    <select id="size-filter">
+      <option value="">Filter by size</option>
+    </select>
+
+    <!-- Product grid -->
+    <div class="product-grid" id="product-list">
+      <!-- JS will load products here -->
+    </div>
   </section>
 
   <footer>
-    <p>&copy; 2025 My Shop</p>
+    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
   </footer>
 
-  <!-- PapaParse for CSV parsing -->
+  <!-- JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-  <!-- Your main JS -->
   <script src="js/main.js"></script>
 </body>
 </html>
