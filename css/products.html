@@ -2,40 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products - Hype24/7</title>
-  <link rel="stylesheet" href="style.css"> <!-- ✅ make sure style.css is in same folder -->
+  <title>Products</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <header>
-    <div class="logo">Hype24/7</div>
+    <div class="logo">My Store</div>
     <nav>
       <a href="index.html">Home</a>
       <a href="products.html">Products</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
       <a href="cart.html">Cart</a>
     </nav>
   </header>
 
-  <section class="featured-products">
-    <h2>Our Products</h2>
+  <main>
+    <section class="featured-products">
+      <h1>Our Products</h1>
 
-    <!-- Search + Filter Controls -->
-    <div style="margin-bottom:20px; display:flex; gap:15px; flex-wrap:wrap;">
+      <!-- Search + Filter -->
       <input type="text" id="searchInput" placeholder="Search products...">
       <select id="sizeFilter">
-        <option value="">Filter by size</option>
+        <option value="">All Sizes</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
       </select>
-    </div>
 
-    <!-- Products grid -->
-    <div id="products" class="product-grid"></div>
-  </section>
+      <div id="products" class="product-grid"></div>
+    </section>
+  </main>
 
   <footer>
-    <p>&copy; 2025 Hype24/7. All rights reserved.</p>
+    <p>&copy; 2025 My Store</p>
   </footer>
 
   <script>
@@ -67,61 +66,48 @@
       );
 
       Promise.all(promises).then(results => {
-        allProducts = results.flat();
+        allProducts = results.flat().filter(row => Object.values(row).some(v => v && v.trim() !== ""));
         renderProducts(allProducts);
-        populateSizeFilter(allProducts);
       });
     }
 
- function renderProducts(products) {
-  const container = document.getElementById("products");
-  container.innerHTML = "";
+    function renderProducts(products) {
+      const container = document.getElementById("products");
+      container.innerHTML = "";
 
-  products.forEach(row => {
-    const card = document.createElement("div");
-    card.className = "product-card";
+      products.forEach(row => {
+        const card = document.createElement("div");
+        card.className = "product-card";
 
-    // Flexible rendering: loop over all columns
-    for (let key in row) {
-      if (row[key] && row[key].trim() !== "") {
-        const p = document.createElement("p");
-        p.innerHTML = `<strong>${key}:</strong> ${row[key]}`;
-        card.appendChild(p);
-      }
-    }
+        for (let key in row) {
+          if (row[key] && row[key].trim() !== "") {
+            const p = document.createElement("p");
+            p.innerHTML = `<strong>${key}:</strong> ${row[key]}`;
+            card.appendChild(p);
+          }
+        }
 
-    container.appendChild(card);
-  });
-}
-
-    function populateSizeFilter(products) {
-      const sizeFilter = document.getElementById("sizeFilter");
-      const sizes = [...new Set(products.map(p => p.Size).filter(Boolean))];
-      sizes.forEach(size => {
-        const option = document.createElement("option");
-        option.value = size;
-        option.textContent = size;
-        sizeFilter.appendChild(option);
+        container.appendChild(card);
       });
     }
 
-    document.getElementById("searchInput").addEventListener("input", function () {
-      const searchValue = this.value.toLowerCase();
-      const sizeValue = document.getElementById("sizeFilter").value;
+    // Simple search + size filter
+    document.getElementById("searchInput").addEventListener("input", e => {
+      const term = e.target.value.toLowerCase();
       const filtered = allProducts.filter(p =>
-        (!searchValue || (p.Name && p.Name.toLowerCase().includes(searchValue))) &&
-        (!sizeValue || p.Size === sizeValue)
+        Object.values(p).some(v => v && v.toLowerCase().includes(term))
       );
       renderProducts(filtered);
     });
 
-    document.getElementById("sizeFilter").addEventListener("change", function () {
-      const searchValue = document.getElementById("searchInput").value.toLowerCase();
-      const sizeValue = this.value;
-      const filtered = allProducts.filter(p =>
-        (!searchValue || (p.Name && p.Name.toLowerCase().includes(searchValue))) &&
-        (!sizeValue || p.Size === sizeValue)
-      );
+    document.getElementById("sizeFilter").addEventListener("change", e => {
+      const size = e.target.value;
+      let filtered = allProducts;
+      if (size) {
+        filtered = allProducts.filter(p =>
+          Object.values(p).some(v => v && v.toLowerCase() === size.toLowerCase())
+        );
+      }
       renderProducts(filtered);
     });
 
