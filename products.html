@@ -3,41 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Hype24/7 Products</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- PapaParse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <header>
-    <div class="logo">My Store</div>
+    <div class="logo">Hype24/7</div>
     <nav>
       <a href="index.html">Home</a>
       <a href="products.html">Products</a>
-      <a href="cart.html">Cart</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
     </nav>
   </header>
 
-  <main>
-    <section class="featured-products">
-      <h2>Products</h2>
+  <section class="featured-products">
+    <h2>All Products</h2>
+    <div id="product-list" class="product-grid"></div>
+  </section>
 
-      <!-- Search + Size Filter -->
-      <input type="text" id="search" placeholder="Search products...">
-      <select id="sizeFilter">
-        <option value="">All Sizes</option>
-      </select>
+  <script>
+    const csvUrls = [
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
+    ];
 
-      <!-- Product Grid -->
-      <div class="product-grid" id="product-grid"></div>
-    </section>
-  </main>
+    const productList = document.getElementById("product-list");
 
-  <footer>
-    <p>&copy; 2025 My Store</p>
-  </footer>
+    function renderProduct(product) {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.innerHTML = `
+        <img src="${product.Image || ''}" alt="${product.Name || 'Product'}">
+        <h3>${product.Name || 'Unnamed'}</h3>
+        <p class="price">${product.Price || ''}</p>
+      `;
+      productList.appendChild(card);
+    }
 
-  <!-- Main script -->
-  <script src="js/main.js"></script>
+    async function loadAllCSVs() {
+      for (let url of csvUrls) {
+        await new Promise((resolve) => {
+          Papa.parse(url, {
+            download: true,
+            header: true,
+            complete: (results) => {
+              results.data.forEach(product => {
+                if (product.Name) renderProduct(product);
+              });
+              resolve();
+            }
+          });
+        });
+      }
+    }
+
+    loadAllCSVs();
+  </script>
 </body>
 </html>
