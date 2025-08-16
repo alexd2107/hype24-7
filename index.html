@@ -48,155 +48,95 @@
     }
 
     /* Shop Section */
-    #shop {
-      padding: 40px 20px;
-    }
-    #shop h2 {
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 2rem;
-    }
+    #shop {<!-- Shop Section -->
+<section id="shop">
+  <h2>Our Inventory</h2>
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    input, select {
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-    }
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search sneakers...">
+    <select id="sizeFilter">
+      <option value="">All Sizes</option>
+    </select>
+    <select id="priceFilter">
+      <option value="">All Prices</option>
+      <option value="0-200">$0 - $200</option>
+      <option value="200-400">$200 - $400</option>
+      <option value="400-600">$400 - $600</option>
+      <option value="600+">$600+</option>
+    </select>
+  </div>
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
+  <div class="grid" id="inventory"></div>
+</section>
 
-    .card {
-      background: #222;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-      text-align: center;
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: scale(1.05);
-    }
-    .card h3 {
-      margin: 10px 0;
-    }
-    .price {
-      color: #ff4500;
-      font-weight: bold;
-      margin-top: 5px;
-    }
-  </style>
-</head>
-<body>
+<script>
+  let inventoryData = [];
+  
+  async function loadInventory() {
+    // ✅ Your published Google Sheets link
+    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv";
+    const response = await fetch(url);
+    const data = await response.text();
+    const rows = data.split("\n").map(r => r.split(","));
 
-  <!-- Navbar -->
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#shop">Shop</a>
-  </nav>
+    const headers = rows[0];
+    inventoryData = rows.slice(1).map(r => {
+      let obj = {};
+      headers.forEach((h, i) => obj[h.trim().toLowerCase()] = r[i] ? r[i].trim() : "");
+      return obj;
+    });
 
-  <!-- Hero -->
-  <header id="home">
-    <h1>Welcome to Hype24/7</h1>
-    <a href="#shop">Shop Now</a>
-  </header>
+    populateSizeFilter();
+    renderCards(inventoryData);
+  }
 
-  <!-- Shop Section -->
-  <section id="shop">
-    <h2>Our Inventory</h2>
+  function renderCards(data) {
+    let container = document.getElementById("inventory");
+    container.innerHTML = "";
 
-    <div class="controls">
-      <input type="text" id="search" placeholder="Search sneakers...">
-      <select id="sizeFilter">
-        <option value="">All Sizes</option>
-      </select>
-      <select id="priceFilter">
-        <option value="">All Prices</option>
-        <option value="0-200">$0 - $200</option>
-        <option value="200-400">$200 - $400</option>
-        <option value="400-600">$400 - $600</option>
-        <option value="600+">$600+</option>
-      </select>
-    </div>
+    data.forEach(item => {
+      if (!item["name"]) return; // skip empty rows
 
-    <div class="grid" id="inventory"></div>
-  </section>
+      let card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${item["name"]}</h3>
+        <p>Size: ${item["size"] || "-"}</p>
+        <p class="price">${item["price"] || "N/A"}</p>
+      `;
+      container.appendChild(card);
+    });
+  }
 
-  <script>
-    let inventoryData = [];
-    
-    async function loadInventory() {
-      // 🔗 Replace with your published Google Sheets CSV link
-      const url = "PASTE-YOUR-PUBLISHED-SHEET-LINK-HERE";
-      const response = await fetch(url);
-      const data = await response.text();
-      const rows = data.split("\n").map(r => r.split(","));
+  function populateSizeFilter() {
+    const sizeSet = new Set(inventoryData.map(item => item["size"]));
+    const sizeFilter = document.getElementById("sizeFilter");
+    sizeSet.forEach(size => {
+      if (size) {
+        let option = document.createElement("option");
+        option.value = size;
+        option.textContent = size;
+        sizeFilter.appendChild(option);
+      }
+    });
+  }
 
-      const headers = rows[0];
-      inventoryData = rows.slice(1).map(r => {
-        let obj = {};
-        headers.forEach((h, i) => obj[h.trim()] = r[i] ? r[i].trim() : "");
-        return obj;
-      });
+  function applyFilters() {
+    const search = document.getElementById("search").value.toLowerCase();
+    const size = document.getElementById("sizeFilter").value;
+    const price = document.getElementById("priceFilter").value;
 
-      populateSizeFilter();
-      renderCards(inventoryData);
-    }
+    let filtered = inventoryData.filter(item => {
+      let matchesSearch = Object.values(item).some(val => 
+        val.toLowerCase().includes(search)
+      );
 
-    function renderCards(data) {
-      let container = document.getElementById("inventory");
-      container.innerHTML = "";
+      let matchesSize = size ? item["size"] === size : true;
 
-      data.forEach(item => {
-        let card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h3>${item["Model"] || "Sneaker"}</h3>
-          <p>Size: ${item["Size"] || "-"}</p>
-          <p class="price">$${item["Price"] || "N/A"}</p>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function populateSizeFilter() {
-      const sizeSet = new Set(inventoryData.map(item => item["Size"]));
-      const sizeFilter = document.getElementById("sizeFilter");
-      sizeSet.forEach(size => {
-        if (size) {
-          let option = document.createElement("option");
-          option.value = size;
-          option.textContent = size;
-          sizeFilter.appendChild(option);
-        }
-      });
-    }
-
-    function applyFilters() {
-      const search = document.getElementById("search").value.toLowerCase();
-      const size = document.getElementById("sizeFilter").value;
-      const price = document.getElementById("priceFilter").value;
-
-      let filtered = inventoryData.filter(item => {
-        let matchesSearch = Object.values(item).some(val => 
-          val.toLowerCase().includes(search)
-        );
-
-        let matchesSize = size ? item["Size"] === size : true;
-
-        let matchesPrice = true;
-        if (price) {
-          let itemPrice = parseFloat(item["Price"].replace(/[^0-9.]/g, ""));
+      let matchesPrice = true;
+      if (price && item["price"]) {
+        let itemPrice = parseFloat(item["price"].replace(/[^0-9.]/g, ""));
+        if (!isNaN(itemPrice)) {
           if (price.includes("+")) {
             matchesPrice = itemPrice >= parseInt(price);
           } else {
@@ -204,18 +144,17 @@
             matchesPrice = itemPrice >= min && itemPrice <= max;
           }
         }
+      }
 
-        return matchesSearch && matchesSize && matchesPrice;
-      });
+      return matchesSearch && matchesSize && matchesPrice;
+    });
 
-      renderCards(filtered);
-    }
+    renderCards(filtered);
+  }
 
-    document.getElementById("search").addEventListener("input", applyFilters);
-    document.getElementById("sizeFilter").addEventListener("change", applyFilters);
-    document.getElementById("priceFilter").addEventListener("change", applyFilters);
+  document.getElementById("search").addEventListener("input", applyFilters);
+  document.getElementById("sizeFilter").addEventListener("change", applyFilters);
+  document.getElementById("priceFilter").addEventListener("change", applyFilters);
 
-    loadInventory();
-  </script>
-</body>
-</html>
+  loadInventory();
+</script>
