@@ -1,33 +1,34 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const products = [
-    {
-      name: "Product 1",
-      price: "$19.99",
-      image: "https://via.placeholder.com/300x200"
-    },
-    {
-      name: "Product 2",
-      price: "$29.99",
-      image: "https://via.placeholder.com/300x200"
-    },
-    {
-      name: "Product 3",
-      price: "$39.99",
-      image: "https://via.placeholder.com/300x200"
-    }
-  ];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">My Store</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="cart.html">Cart</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
 
-  const productList = document.getElementById("product-list");
+  <section class="featured-products">
+    <h2>Our Products</h2>
+    <div class="product-grid" id="product-list">
+      <!-- Product cards will load here -->
+    </div>
+  </section>
 
-  products.forEach(product => {
-    const card = document.createElement("div");
-    card.classList.add("product-card");
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}">
-      <h3>${product.name}</h3>
-      <p class="price">${product.price}</p>
-      <button class="button">Add to Cart</button>
-    `;
-    productList.appendChild(card);
-  });
-});
+  <footer>
+    <p>&copy; 2025 My Store. All rights reserved.</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
