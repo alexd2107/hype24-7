@@ -3,37 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Details</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Product - Hype24/7</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header>
-    <div class="logo">My Shop</div>
+    <div class="logo">Hype24/7</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="products.html">Products</a>
+      <a href="products.html">Shop</a>
+      <a href="cart.html">Cart</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
-      <a href="cart.html">Cart</a>
     </nav>
   </header>
 
   <section class="product-detail">
-    <div class="product-detail-content">
-      <img id="product-image" src="" alt="">
-      <div class="product-info">
-        <h2 id="product-title"></h2>
-        <p id="product-description"></p>
-        <p class="price" id="product-price"></p>
-        <button class="button" onclick="addToCart()">Add to Cart</button>
-      </div>
+    <div class="product-detail-content" id="product-detail">
+      <!-- JS will inject product details here -->
     </div>
   </section>
 
   <footer>
-    <p>&copy; 2025 My Shop</p>
+    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
