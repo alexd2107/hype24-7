@@ -1,31 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>StreetFlex | Shop</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8">
+  <title>Shop All Products</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #fff; margin: 0; }
+    nav { background: #000; padding: 15px; text-align: center; }
+    nav a { color: #fff; margin: 0 10px; text-decoration: none; }
+    section { padding: 40px 20px; }
+    .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    input, select { padding: 8px; border-radius: 6px; border: none; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .card { background: #222; padding: 15px; border-radius: 10px; text-align: center; }
+    .card h3 { margin: 10px 0 5px; }
+    .price { color: #ff4500; font-weight: bold; }
+  </style>
 </head>
 <body>
-<header>
-  <div class="logo">StreetFlex</div>
   <nav>
     <a href="index.html">Home</a>
     <a href="products.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="cart.html">Cart</a>
   </nav>
-</header>
 
-<section class="featured-products">
-  <h2>Shop All Products</h2>
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="images/placeholder1.jpg" alt="Product 1" />
-      <h3>Sneaker Name</h3>
-      <p>$180</p>
-      <a href="product.html" class="button">View</a>
+  <section id="shop">
+    <h2>Shop All Products</h2>
+
+    <div class="controls">
+      <input type="text" id="search" placeholder="Search sneakers...">
+      <select id="sizeFilter">
+        <option value="">All Sizes</option>
+      </select>
+      <select id="priceFilter">
+        <option value="">All Prices</option>
+        <option value="0-200">$0 - $200</option>
+        <option value="200-400">$200 - $400</option>
+        <option value="400-600">$400 - $600</option>
+        <option value="600+">$600+</option>
+      </select>
     </div>
-    <div class="product-card">
-      <img src="images/placeholder2.jpg" alt="Product 2" />
-      <h3>Streetwear Hoodi
+
+    <div class="grid" id="inventory"></div>
+  </section>
+
+  <script>
+    let inventoryData = [];
+
+    async function loadInventory() {
+      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv";
+      const res = await fetch(url);
+      const text = await res.text();
+      const rows = text.split("\n").map(r => r.split(","));
+
+      const headers = rows[0].map(h => h.trim().toLowerCase());
+      inventoryData = rows.slice(1).map(r => {
+        let obj = {};
+        headers.forEach((h, i) => obj[h] = r[i] ? r[i].trim() : "");
+        return obj;
+      });
+
+      populateSizeFilter();
+      renderCards(inventoryData);
+    }
+
+    function renderCards(data) {
+      const container = document.getElementById("inventory");
+      container.innerHTML = "";
+
+      data.forEach(item => {
+        if (!item["name"]) return;
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${item["name"]}</h3>
+          <p>Size: ${item["size"] || "-"}</p>
+          <p class="price">${item["price"] || "N/A"}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function populateSizeFilter() {
+      const sizes = [...new Set(inventoryData.map(i => i["size"]))];
+      const sizeFilter = document.getElementById("sizeFilter");
+      sizes.forEach(s => {
+        if (s) {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.textContent = s;
+          sizeFilter.appendChild(opt);
+        }
+      });
+    }
+
+    function applyFilters() {
+      const q = document.getElementById("search").value.toLowerCase();
+      const sz = document.getElementById("sizeFilter").value;
+      const pr = document.getElementById("priceFilter").value;
+
+      const filtered = inventoryData.filter(item => {
+        const matchesQ = Object.values(item).some(v => v.toLowerCase().includes(q));
+        const matchesSz = sz ? item["size"] === sz : true;
+        let matchesPr = true;
+
+        if (pr && item["price"]) {
+          const ip = parseFloat(item["price"].replace(/[^0-9.]/g, ""));
+          if (!isNaN(ip)) {
+            if (pr.includes("+")) {
+              matchesPr = ip >= parseInt(pr);
+            } else {
+              const [min, max] = pr.split("-").map(Number);
+              matchesPr = ip >= min && ip <= max;
+            }
+          }
+        }
+
+        return matchesQ && matchesSz && matchesPr;
+      });
+
+      renderCards(filtered);
+    }
+
+    document.getElementById("search").addEventListener("input", applyFilters);
+    document.getElementById("sizeFilter").addEventListener("change", applyFilters);
+    document.getElementById("priceFilter").addEventListener("change", applyFilters);
+
+    loadInventory();
+  </script>
+</body>
+</html>
+
