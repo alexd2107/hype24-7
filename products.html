@@ -1,60 +1,94 @@
-<script>
-  const sheetLinks = [
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
-  ];
+const csvUrls = [
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
+];
 
-  async function loadAllSheets() {
-    const allRows = [];
+let allProducts = [];
 
-    for (const url of sheetLinks) {
-      try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const parsed = Papa.parse(text, { header: true });
-        
-        parsed.data.forEach(row => {
-          // only add rows with at least one non-empty field
-          if (Object.values(row).some(v => v && v.trim() !== "")) {
-            allRows.push(row);
-          }
+function loadAllCSVs() {
+  let promises = csvUrls.map(url => 
+    fetch(url)
+      .then(res => res.text())
+      .then(csv => new Promise((resolve, reject) => {
+        Papa.parse(csv, {
+          header: true,
+          skipEmptyLines: true,
+          complete: results => resolve(results.data),
+          error: err => reject(err)
         });
-      } catch (err) {
-        console.error("Error fetching sheet:", url, err);
-      }
+      }))
+  );
+
+  Promise.all(promises).then(results => {
+    allProducts = results.flat();
+    renderProducts(allProducts);
+    populateSizeFilter(allProducts);
+  });
+}
+
+function renderProducts(products) {
+  const list = document.getElementById("product-list");
+  list.innerHTML = "";
+
+  if (products.length === 0) {
+    list.innerHTML = "<p>No products found.</p>";
+    return;
+  }
+
+  products.forEach(p => {
+    let sizes = p.Sizes ? p.Sizes.split(",").map(s => s.trim()).join(", ") : "";
+    let price = p.Price ? `$${p.Price}` : "";
+
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      <h3>${p.Name || "Unnamed"}</h3>
+      <p>${price}</p>
+      <p>Sizes: ${sizes}</p>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function populateSizeFilter(products) {
+  const sizeFilter = document.getElementById("sizeFilter");
+  let sizes = new Set();
+
+  products.forEach(p => {
+    if (p.Sizes) {
+      p.Sizes.split(",").forEach(s => sizes.add(s.trim()));
     }
+  });
 
-    renderProducts(allRows);
-  }
+  sizes = Array.from(sizes).sort();
+  sizes.forEach(size => {
+    let opt = document.createElement("option");
+    opt.value = size;
+    opt.textContent = size;
+    sizeFilter.appendChild(opt);
+  });
+}
 
-  function renderProducts(products) {
-    const container = document.getElementById("product-list");
-    container.innerHTML = "";
+// Search + filter
+document.getElementById("searchBox").addEventListener("input", e => {
+  const q = e.target.value.toLowerCase();
+  const filtered = allProducts.filter(p => (p.Name || "").toLowerCase().includes(q));
+  renderProducts(filtered);
+});
 
-    products.forEach(product => {
-      const card = document.createElement("div");
-      card.className = "product-card";
+document.getElementById("sizeFilter").addEventListener("change", e => {
+  const val = e.target.value;
+  const filtered = val ? allProducts.filter(p => p.Sizes && p.Sizes.includes(val)) : allProducts;
+  renderProducts(filtered);
+});
 
-      let content = "";
-      for (const key in product) {
-        if (product[key] && product[key].trim() !== "") {
-          content += `<p><strong>${key}:</strong> ${product[key]}</p>`;
-        }
-      }
-
-      card.innerHTML = content;
-      container.appendChild(card);
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", loadAllSheets);
-</script>
+loadAllCSVs();
