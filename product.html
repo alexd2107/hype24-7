@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>StreetFlex | Product</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/script.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <div class="logo">StreetFlex</div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="products.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="cart.html">Cart</a>
-  </nav>
-</header>
+  <header>
+    <div class="logo">My Shop</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="cart.html">Cart</a>
+    </nav>
+  </header>
 
-<section class="product-detail">
-  <div class="product-detail-content">
-    <img src="images/placeholder1.jpg" alt="Sneaker Name" />
-    <div class="product-info">
-      <h2>Sneaker Name</h2>
-      <p class="price">$180</p>
-      <p class="description">A clean, modern sneaker with premium materials and street-ready style.</p>
-      <button onclick="addToCart('Sneaker Name', 180)" class="button">Add to Cart</button>
+  <section class="product-detail">
+    <div class="product-detail-content">
+      <img id="product-image" src="" alt="">
+      <div class="product-info">
+        <h2 id="product-title"></h2>
+        <p id="product-description"></p>
+        <p class="price" id="product-price"></p>
+        <button class="button" onclick="addToCart()">Add to Cart</button>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<footer>
-  <p>&copy; 2025 StreetFlex. All rights reserved.</p>
-</footer>
+  <footer>
+    <p>&copy; 2025 My Shop</p>
+  </footer>
+
+  <script src="js/main.js"></script>
 </body>
 </html>
