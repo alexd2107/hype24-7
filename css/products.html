@@ -73,17 +73,26 @@
       });
     }
 
-    function renderProducts(products) {
-      const container = document.getElementById("products");
-      container.innerHTML = products.map(p => `
-        <div class="product-card">
-          <img src="${p.Image || 'placeholder.jpg'}" alt="${p.Name}">
-          <h3>${p.Name || ''}</h3>
-          <p class="price">${p.Price || ''}</p>
-          <p>${p.Size || ''}</p>
-        </div>
-      `).join("");
+ function renderProducts(products) {
+  const container = document.getElementById("products");
+  container.innerHTML = "";
+
+  products.forEach(row => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    // Flexible rendering: loop over all columns
+    for (let key in row) {
+      if (row[key] && row[key].trim() !== "") {
+        const p = document.createElement("p");
+        p.innerHTML = `<strong>${key}:</strong> ${row[key]}`;
+        card.appendChild(p);
+      }
     }
+
+    container.appendChild(card);
+  });
+}
 
     function populateSizeFilter(products) {
       const sizeFilter = document.getElementById("sizeFilter");
