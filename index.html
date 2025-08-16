@@ -1,110 +1,43 @@
-<!-- Shop Section -->
-<section id="shop">
-  <h2>Our Inventory</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop - Hype24/7</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">Hype24/7</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="cart.html">Cart</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
 
-  <div class="controls">
-    <input type="text" id="search" placeholder="Search sneakers...">
-    <select id="sizeFilter">
-      <option value="">All Sizes</option>
-    </select>
-    <select id="priceFilter">
-      <option value="">All Prices</option>
-      <option value="0-200">$0 - $200</option>
-      <option value="200-400">$200 - $400</option>
-      <option value="400-600">$400 - $600</option>
-      <option value="600+">$600+</option>
-    </select>
-  </div>
+  <section class="featured-products">
+    <h2>All Products</h2>
 
-  <div class="grid" id="inventory"></div>
-</section>
+    <div style="margin-bottom:20px;">
+      <input type="text" id="searchBox" placeholder="Search products...">
+      <select id="sizeFilter">
+        <option value="">All Sizes</option>
+      </select>
+    </div>
 
-<script>
-  let inventoryData = [];
-  
-  async function loadInventory() {
-    // ✅ Your published Google Sheets link
-    const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv";
-    const response = await fetch(url);
-    const data = await response.text();
-    const rows = data.split("\n").map(r => r.split(","));
+    <div class="product-grid" id="product-list">
+      <!-- Products will load here -->
+    </div>
+  </section>
 
-    const headers = rows[0];
-    inventoryData = rows.slice(1).map(r => {
-      let obj = {};
-      headers.forEach((h, i) => obj[h.trim().toLowerCase()] = r[i] ? r[i].trim() : "");
-      return obj;
-    });
+  <footer>
+    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
+  </footer>
 
-    populateSizeFilter();
-    renderCards(inventoryData);
-  }
-
-  function renderCards(data) {
-    let container = document.getElementById("inventory");
-    container.innerHTML = "";
-
-    data.forEach(item => {
-      if (!item["name"]) return; // skip empty rows
-
-      let card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <h3>${item["name"]}</h3>
-        <p>Size: ${item["size"] || "-"}</p>
-        <p class="price">${item["price"] || "N/A"}</p>
-      `;
-      container.appendChild(card);
-    });
-  }
-
-  function populateSizeFilter() {
-    const sizeSet = new Set(inventoryData.map(item => item["size"]));
-    const sizeFilter = document.getElementById("sizeFilter");
-    sizeSet.forEach(size => {
-      if (size) {
-        let option = document.createElement("option");
-        option.value = size;
-        option.textContent = size;
-        sizeFilter.appendChild(option);
-      }
-    });
-  }
-
-  function applyFilters() {
-    const search = document.getElementById("search").value.toLowerCase();
-    const size = document.getElementById("sizeFilter").value;
-    const price = document.getElementById("priceFilter").value;
-
-    let filtered = inventoryData.filter(item => {
-      let matchesSearch = Object.values(item).some(val => 
-        val.toLowerCase().includes(search)
-      );
-
-      let matchesSize = size ? item["size"] === size : true;
-
-      let matchesPrice = true;
-      if (price && item["price"]) {
-        let itemPrice = parseFloat(item["price"].replace(/[^0-9.]/g, ""));
-        if (!isNaN(itemPrice)) {
-          if (price.includes("+")) {
-            matchesPrice = itemPrice >= parseInt(price);
-          } else {
-            let [min, max] = price.split("-").map(Number);
-            matchesPrice = itemPrice >= min && itemPrice <= max;
-          }
-        }
-      }
-
-      return matchesSearch && matchesSize && matchesPrice;
-    });
-
-    renderCards(filtered);
-  }
-
-  document.getElementById("search").addEventListener("input", applyFilters);
-  document.getElementById("sizeFilter").addEventListener("change", applyFilters);
-  document.getElementById("priceFilter").addEventListener("change", applyFilters);
-
-  loadInventory();
-</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="js/products.js"></script>
+</body>
+</html>
