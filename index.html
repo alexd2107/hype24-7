@@ -1,31 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hype24/7</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <header>
-    <div class="logo">Hype24/7</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="products.html">Shop</a>
-      <a href="cart.html">Cart</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-  </header>
+// CSV links (add as many as you want)
+const sheetUrls = [
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv"
+];
 
-  <section class="hero">
-    <h1>Welcome to Hype24/7</h1>
-    <p>Your destination for the latest sneaker drops.</p>
-    <a href="products.html" class="button">Shop Now</a>
-  </section>
+// All products stored here
+let allProducts = [];
 
-  <footer>
-    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
-  </footer>
-</body>
-</html>
+// Load all sheets
+async function loadProducts() {
+  for (const url of sheetUrls) {
+    await new Promise((resolve, reject) => {
+      Papa.parse(url, {
+        download: true,
+        header: true,
+        complete: function(results) {
+          allProducts = allProducts.concat(results.data);
+          resolve();
+        },
+        error: reject
+      });
+    });
+  }
+  renderProducts(allProducts);
+}
+
+// Render products
+function renderProducts(products) {
+  const grid = document.getElementById("productGrid");
+  grid.innerHTML = "";
+
+  products.forEach(product => {
+    if (!product.Name) return; // skip empty rows
+    const card = document.createElement("div");
+    card.classList.add("product-card");
+    card.innerHTML = `
+      <img src="${product.Image || "https://via.placeholder.com/250"}" alt="${product.Name}">
+      <h3>${product.Name}</h3>
+      <p class="price">$${product.Price || "N/A"}</p>
+      <p>Sizes: ${product.Sizes || "One Size"}</p>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// Search + filter
+document.addEventListener("DOMContentLoaded", () => {
+  loadProducts();
+
+  document.getElementById("searchInput").addEventListener("input", e => {
+    const term = e.target.value.toLowerCase();
+    const filtered = allProducts.filter(p => p.Name?.toLowerCase().includes(term));
+    renderProducts(filtered);
+  });
+
+  document.getElementById("sizeFilter").addEventListener("change", e => {
+    const size = e.target.value;
+    const filtered = size
+      ? allProducts.filter(p => p.Sizes?.includes(size))
+      : allProducts;
+    renderProducts(filtered);
+  });
+});
