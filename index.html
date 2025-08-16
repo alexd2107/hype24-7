@@ -1,88 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>StreetFlex | Home</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hype24/7 Inventory</title>
   <style>
-    #inventory {
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #111;
+      color: #fff;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls {
+      margin-bottom: 20px;
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
+      gap: 10px;
       justify-content: center;
-      padding: 20px;
     }
-    .sneaker {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      padding: 15px;
-      width: 200px;
+    input, select {
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #222;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
       text-align: center;
     }
-    .sneaker h2 { font-size: 1.2rem; margin-bottom: 10px; }
-    .sneaker p { font-size: 1rem; margin: 5px 0; }
-    .sneaker img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
+    th {
+      background-color: #333;
+      color: #fff;
+    }
+    tr:nth-child(even) {
+      background-color: #2a2a2a;
+    }
   </style>
 </head>
 <body>
-<header>
-  <div class="logo">StreetFlex</div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="products.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="cart.html">Cart</a>
-  </nav>
-</header>
+  <h1>Live Sneaker Inventory</h1>
 
-<section class="hero">
-  <h1>Fresh Drops. Clean Fits.</h1>
-  <p>Shop the latest in sneakers, streetwear and accessories.</p>
-  <a href="products.html" class="button">Shop Now</a>
-</section>
+  <!-- Search + Filters -->
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search sneakers...">
+    <select id="sizeFilter">
+      <option value="">All Sizes</option>
+    </select>
+    <select id="priceFilter">
+      <option value="">All Prices</option>
+      <option value="0-200">$0 - $200</option>
+      <option value="200-400">$200 - $400</option>
+      <option value="400-600">$400 - $600</option>
+      <option value="600+">$600+</option>
+    </select>
+  </div>
 
-<section class="featured-products">
-  <h2>Featured Products</h2>
-  <div class="product-grid" id="inventory"></div>
-</section>
+  <!-- Table -->
+  <table id="inventory"></table>
 
-<footer>
-  <p>&copy; 2025 StreetFlex. All rights reserved.</p>
-</footer>
+  <script>
+    let inventoryData = [];
+    
+    async function loadInventory() {
+      // 🔗 Replace with your actual published Google Sheets CSV link
+      const url = " https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv;
+      const response = await fetch(url);
+      const data = await response.text();
+      const rows = data.split("\n").map(r => r.split(","));
 
-<script>
-  // Use the CSV you uploaded
-  const csvUrl = 'sneakercon_inventory_list_-_jordan_1.csv';
+      const headers = rows[0];
+      inventoryData = rows.slice(1).map(r => {
+        let obj = {};
+        headers.forEach((h, i) => obj[h.trim()] = r[i] ? r[i].trim() : "");
+        return obj;
+      });
 
-  Papa.parse(csvUrl, {
-    download: true,
-    header: true,
-    complete: function(results) {
-      const inventory = results.data;
-      const container = document.getElementById('inventory');
+      populateSizeFilter();
+      renderTable(inventoryData);
+    }
 
-      inventory.forEach(item => {
-        if(item.Name) {  // Skip empty rows
-          const div = document.createElement('div');
-          div.className = 'sneaker';
-          div.innerHTML = `
-            <img src="${item.Image || 'images/placeholder1.jpg'}" alt="${item.Name}">
-            <h2>${item.Name}</h2>
-            <p>Size: ${item.Size}</p>
-            <p>Color: ${item.Color}</p>
-            <p>Price: $${item.Price}</p>
-            <a href="product.html" class="button">View</a>
-          `;
-          container.appendChild(div);
+    function renderTable(data) {
+      let table = "<tr>";
+      Object.keys(inventoryData[0]).forEach(header => {
+        table += `<th>${header}</th>`;
+      });
+      table += "</tr>";
+
+      data.forEach(item => {
+        table += "<tr>";
+        Object.values(item).forEach(cell => {
+          table += `<td>${cell}</td>`;
+        });
+        table += "</tr>";
+      });
+
+      document.getElementById("inventory").innerHTML = table;
+    }
+
+    function populateSizeFilter() {
+      const sizeSet = new Set(inventoryData.map(item => item["Size"]));
+      const sizeFilter = document.getElementById("sizeFilter");
+      sizeSet.forEach(size => {
+        if (size) {
+          let option = document.createElement("option");
+          option.value = size;
+          option.textContent = size;
+          sizeFilter.appendChild(option);
         }
       });
     }
-  });
-</script>
+
+    function applyFilters() {
+      const search = document.getElementById("search").value.toLowerCase();
+      const size = document.getElementById("sizeFilter").value;
+      const price = document.getElementById("priceFilter").value;
+
+      let filtered = inventoryData.filter(item => {
+        let matchesSearch = Object.values(item).some(val => 
+          val.toLowerCase().includes(search)
+        );
+
+        let matchesSize = size ? item["Size"] === size : true;
+
+        let matchesPrice = true;
+        if (price) {
+          let itemPrice = parseFloat(item["Price"].replace(/[^0-9.]/g, ""));
+          if (price.includes("+")) {
+            matchesPrice = itemPrice >= parseInt(price);
+          } else {
+            let [min, max] = price.split("-").map(Number);
+            matchesPrice = itemPrice >= min && itemPrice <= max;
+          }
+        }
+
+        return matchesSearch && matchesSize && matchesPrice;
+      });
+
+      renderTable(filtered);
+    }
+
+    document.getElementById("search").addEventListener("input", applyFilters);
+    document.getElementById("sizeFilter").addEventListener("change", applyFilters);
+    document.getElementById("priceFilter").addEventListener("change", applyFilters);
+
+    loadInventory();
+  </script>
 </body>
 </html>
+
 
 
