@@ -4,6 +4,43 @@
   <meta charset="UTF-8" />
   <title>StreetFlex | Home</title>
   <link rel="stylesheet" href="css/style.css" />
+  <!-- Include PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    /* Inventory styles */
+    #inventory {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .sneaker {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 15px;
+      width: 200px;
+      text-align: center;
+    }
+
+    .sneaker h2 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .sneaker p {
+      font-size: 1rem;
+      margin: 5px 0;
+    }
+
+    .sneaker img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
 <header>
@@ -25,24 +62,43 @@
 
 <section class="featured-products">
   <h2>Featured Products</h2>
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="images/placeholder1.jpg" alt="Product 1" />
-      <h3>Sneaker Name</h3>
-      <p>$180</p>
-      <a href="product.html" class="button">View</a>
-    </div>
-    <div class="product-card">
-      <img src="images/placeholder2.jpg" alt="Product 2" />
-      <h3>Streetwear Hoodie</h3>
-      <p>$95</p>
-      <a href="product.html" class="button">View</a>
-    </div>
+  <div class="product-grid" id="inventory">
+    <!-- Sneakers from Google Sheets will appear here -->
   </div>
 </section>
 
 <footer>
   <p>&copy; 2025 StreetFlex. All rights reserved.</p>
 </footer>
+
+<script>
+  const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv';
+
+  Papa.parse(csvUrl, {
+    download: true,
+    header: true,
+    complete: function(results) {
+      const inventory = results.data;
+      const container = document.getElementById('inventory');
+
+      inventory.forEach(item => {
+        if(item.Name) { // Skip empty rows
+          const div = document.createElement('div');
+          div.className = 'sneaker';
+          div.innerHTML = `
+            <img src="${item.Image || 'images/placeholder1.jpg'}" alt="${item.Name}">
+            <h2>${item.Name}</h2>
+            <p>Size: ${item.Size}</p>
+            <p>Color: ${item.Color}</p>
+            <p>Price: $${item.Price}</p>
+            <a href="product.html" class="button">View</a>
+          `;
+          container.appendChild(div);
+        }
+      });
+    }
+  });
+</script>
 </body>
 </html>
+
