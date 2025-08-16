@@ -4,10 +4,8 @@
   <meta charset="UTF-8" />
   <title>StreetFlex | Home</title>
   <link rel="stylesheet" href="css/style.css" />
-  <!-- Include PapaParse for CSV parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
-    /* Inventory styles */
     #inventory {
       display: flex;
       flex-wrap: wrap;
@@ -15,7 +13,6 @@
       justify-content: center;
       padding: 20px;
     }
-
     .sneaker {
       background-color: white;
       border-radius: 8px;
@@ -24,22 +21,9 @@
       width: 200px;
       text-align: center;
     }
-
-    .sneaker h2 {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-    }
-
-    .sneaker p {
-      font-size: 1rem;
-      margin: 5px 0;
-    }
-
-    .sneaker img {
-      width: 100%;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
+    .sneaker h2 { font-size: 1.2rem; margin-bottom: 10px; }
+    .sneaker p { font-size: 1rem; margin: 5px 0; }
+    .sneaker img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -62,9 +46,7 @@
 
 <section class="featured-products">
   <h2>Featured Products</h2>
-  <div class="product-grid" id="inventory">
-    <!-- Sneakers from Google Sheets will appear here -->
-  </div>
+  <div class="product-grid" id="inventory"></div>
 </section>
 
 <footer>
@@ -72,7 +54,8 @@
 </footer>
 
 <script>
-  const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv';
+  // Use the CSV you uploaded
+  const csvUrl = 'sneakercon_inventory_list_-_jordan_1.csv';
 
   Papa.parse(csvUrl, {
     download: true,
@@ -82,7 +65,7 @@
       const container = document.getElementById('inventory');
 
       inventory.forEach(item => {
-        if(item.Name) { // Skip empty rows
+        if(item.Name) {  // Skip empty rows
           const div = document.createElement('div');
           div.className = 'sneaker';
           div.innerHTML = `
@@ -101,4 +84,5 @@
 </script>
 </body>
 </html>
+
 
