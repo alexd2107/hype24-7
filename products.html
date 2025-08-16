@@ -20,9 +20,17 @@
   <main>
     <section>
       <h2 style="text-align:center; margin-top:20px;">Shop All</h2>
-      <div id="all-products" class="products-grid">
-        <!-- Cards injected here -->
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <label for="size-filter">Filter by Size:</label>
+        <select id="size-filter">
+          <option value="all">All</option>
+        </select>
       </div>
+
+      <!-- Products -->
+      <div id="all-products" class="products-grid"></div>
     </section>
   </main>
 
@@ -45,9 +53,12 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
+    let allProducts = [];
+
     async function loadAllSheets() {
       const container = document.getElementById("all-products");
       container.innerHTML = "";
+      allProducts = []; // reset for fresh load
 
       for (const url of sheetUrls) {
         try {
@@ -59,19 +70,10 @@
             skipEmptyLines: true,
             complete: (results) => {
               results.data.forEach(row => {
-                const card = document.createElement("div");
-                card.className = "product-card";
-
-                card.innerHTML = `
-                  <div class="product-info">
-                    <h3>${row.Name || "Unnamed Product"}</h3>
-                    <p class="price">${row.Price || "Price on request"}</p>
-                    <p class="size">Size: ${row.Size || "N/A"}</p>
-                  </div>
-                `;
-
-                container.appendChild(card);
+                allProducts.push(row);
               });
+              renderProducts(allProducts);
+              updateSizeFilter();
             }
           });
         } catch (err) {
@@ -79,6 +81,49 @@
         }
       }
     }
+
+    function renderProducts(products) {
+      const container = document.getElementById("all-products");
+      container.innerHTML = "";
+
+      products.forEach(row => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+        card.innerHTML = `
+          <div class="product-info">
+            <h3>${row.Name || "Unnamed Product"}</h3>
+            <p class="price">${row.Price || "Price on request"}</p>
+            <p class="size">Size: ${row.Size || "N/A"}</p>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function updateSizeFilter() {
+      const sizeFilter = document.getElementById("size-filter");
+      const sizes = [...new Set(allProducts.map(p => p.Size).filter(s => s))];
+
+      // reset dropdown
+      sizeFilter.innerHTML = `<option value="all">All</option>`;
+      sizes.forEach(size => {
+        const option = document.createElement("option");
+        option.value = size;
+        option.textContent = size;
+        sizeFilter.appendChild(option);
+      });
+    }
+
+    document.getElementById("size-filter").addEventListener("change", (e) => {
+      const value = e.target.value;
+      if (value === "all") {
+        renderProducts(allProducts);
+      } else {
+        renderProducts(allProducts.filter(p => p.Size === value));
+      }
+    });
 
     document.addEventListener("DOMContentLoaded", loadAllSheets);
   </script>
