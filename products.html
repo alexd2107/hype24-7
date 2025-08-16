@@ -1,132 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Shop All Products</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products - Hype24/7</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
-    body { font-family: sans-serif; background: #111; color: #fff; margin: 0; }
-    nav { background: #000; padding: 15px; text-align: center; }
-    nav a { color: #fff; margin: 0 10px; text-decoration: none; }
-    section { padding: 40px 20px; }
-    .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-    input, select { padding: 8px; border-radius: 6px; border: none; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-    .card { background: #222; padding: 15px; border-radius: 10px; text-align: center; }
-    .card h3 { margin: 10px 0 5px; }
-    .price { color: #ff4500; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7f7;
+    }
+    header {
+      background: #111;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .product-card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .product-card:hover {
+      transform: scale(1.03);
+    }
+    .product-card h3 {
+      margin: 0 0 10px;
+    }
+    .product-card p {
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="products.html">Shop</a>
-  </nav>
+  <header>
+    <h1>Our Products</h1>
+  </header>
 
-  <section id="shop">
-    <h2>Shop All Products</h2>
-
-    <div class="controls">
-      <input type="text" id="search" placeholder="Search sneakers...">
-      <select id="sizeFilter">
-        <option value="">All Sizes</option>
-      </select>
-      <select id="priceFilter">
-        <option value="">All Prices</option>
-        <option value="0-200">$0 - $200</option>
-        <option value="200-400">$200 - $400</option>
-        <option value="400-600">$400 - $600</option>
-        <option value="600+">$600+</option>
-      </select>
-    </div>
-
-    <div class="grid" id="inventory"></div>
-  </section>
+  <div class="container">
+    <div id="product-list" class="product-list"></div>
+  </div>
 
   <script>
-    let inventoryData = [];
+    const sheetLinks = [
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
+    ];
 
-    async function loadInventory() {
-  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv";
-  const res = await fetch(url);
-  const text = await res.text();
-  const rows = text.split("\n").map(r => r.split(","));
+    async function loadAllSheets() {
+      const allRows = [];
 
-  const headers = rows[0].map(h => h.trim().toLowerCase());
-  inventoryData = rows.slice(1).map(r => {
-    let obj = {};
-    headers.forEach((h, i) => obj[h] = r[i] ? r[i].trim() : "");
-    return obj;
-  });
+      for (const url of sheetLinks) {
+        try {
+          const response = await fetch(url);
+          const text = await response.text();
+          const rows = Papa.parse(text, { header: true }).data;
 
-  populateSizeFilter();
-  renderCards(inventoryData);
-}
+          rows.forEach(r => {
+            if (r.name && r.name.trim() !== "") {
+              allRows.push(r);
+            }
+          });
+        } catch (err) {
+          console.error("Error fetching sheet:", url, err);
+        }
+      }
 
+      renderProducts(allRows);
+    }
 
-    function renderCards(data) {
-      const container = document.getElementById("inventory");
+    function renderProducts(products) {
+      const container = document.getElementById("product-list");
       container.innerHTML = "";
 
-      data.forEach(item => {
-        if (!item["name"]) return;
+      products.forEach(product => {
         const card = document.createElement("div");
-        card.className = "card";
+        card.className = "product-card";
+
         card.innerHTML = `
-          <h3>${item["name"]}</h3>
-          <p>Size: ${item["size"] || "-"}</p>
-          <p class="price">${item["price"] || "N/A"}</p>
+          <h3>${product.name || "Unnamed"}</h3>
+          <p><strong>Size:</strong> ${product.size || "N/A"}</p>
+          <p><strong>Price:</strong> ${product.price || "N/A"}</p>
         `;
+
         container.appendChild(card);
       });
     }
 
-    function populateSizeFilter() {
-      const sizes = [...new Set(inventoryData.map(i => i["size"]))];
-      const sizeFilter = document.getElementById("sizeFilter");
-      sizes.forEach(s => {
-        if (s) {
-          const opt = document.createElement("option");
-          opt.value = s;
-          opt.textContent = s;
-          sizeFilter.appendChild(opt);
-        }
-      });
-    }
-
-    function applyFilters() {
-      const q = document.getElementById("search").value.toLowerCase();
-      const sz = document.getElementById("sizeFilter").value;
-      const pr = document.getElementById("priceFilter").value;
-
-      const filtered = inventoryData.filter(item => {
-        const matchesQ = Object.values(item).some(v => v.toLowerCase().includes(q));
-        const matchesSz = sz ? item["size"] === sz : true;
-        let matchesPr = true;
-
-        if (pr && item["price"]) {
-          const ip = parseFloat(item["price"].replace(/[^0-9.]/g, ""));
-          if (!isNaN(ip)) {
-            if (pr.includes("+")) {
-              matchesPr = ip >= parseInt(pr);
-            } else {
-              const [min, max] = pr.split("-").map(Number);
-              matchesPr = ip >= min && ip <= max;
-            }
-          }
-        }
-
-        return matchesQ && matchesSz && matchesPr;
-      });
-
-      renderCards(filtered);
-    }
-
-    document.getElementById("search").addEventListener("input", applyFilters);
-    document.getElementById("sizeFilter").addEventListener("change", applyFilters);
-    document.getElementById("priceFilter").addEventListener("change", applyFilters);
-
-    loadInventory();
+    document.addEventListener("DOMContentLoaded", loadAllSheets);
   </script>
 </body>
 </html>
+
 
