@@ -46,21 +46,22 @@
     let inventoryData = [];
 
     async function loadInventory() {
-      const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv";
-      const res = await fetch(url);
-      const text = await res.text();
-      const rows = text.split("\n").map(r => r.split(","));
+  const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv";
+  const res = await fetch(url);
+  const text = await res.text();
+  const rows = text.split("\n").map(r => r.split(","));
 
-      const headers = rows[0].map(h => h.trim().toLowerCase());
-      inventoryData = rows.slice(1).map(r => {
-        let obj = {};
-        headers.forEach((h, i) => obj[h] = r[i] ? r[i].trim() : "");
-        return obj;
-      });
+  const headers = rows[0].map(h => h.trim().toLowerCase());
+  inventoryData = rows.slice(1).map(r => {
+    let obj = {};
+    headers.forEach((h, i) => obj[h] = r[i] ? r[i].trim() : "");
+    return obj;
+  });
 
-      populateSizeFilter();
-      renderCards(inventoryData);
-    }
+  populateSizeFilter();
+  renderCards(inventoryData);
+}
+
 
     function renderCards(data) {
       const container = document.getElementById("inventory");
