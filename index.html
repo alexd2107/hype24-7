@@ -16,14 +16,66 @@
     </nav>
   </header>
 
-  <section class="hero">
-    <h1>Welcome to Hype24/7</h1>
-    <p>Your one-stop shop for hype sneakers and apparel.</p>
-    <a class="button" href="products.html">Shop Now</a>
-  </section>
+  <main>
+    <section class="hero">
+      <h1>Welcome to Hype24/7</h1>
+      <p>Your spot for exclusive drops & rare finds</p>
+      <a href="products.html" class="btn">Shop Now</a>
+    </section>
+
+    <section class="featured">
+      <h2>Featured Products</h2>
+      <div id="featured-products" class="product-grid"></div>
+      <div class="view-all">
+        <a href="products.html" class="btn">View All Products</a>
+      </div>
+    </section>
+  </main>
 
   <footer>
     <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
   </footer>
+
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script>
+    const featuredSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv";
+
+    async function loadFeatured() {
+      const container = document.getElementById("featured-products");
+
+      try {
+        const response = await fetch(featuredSheetUrl);
+        const csvText = await response.text();
+
+        Papa.parse(csvText, {
+          header: true,
+          complete: (results) => {
+            // just grab first 4 rows that have data
+            const rows = results.data.filter(r => Object.values(r).some(v => v && v.trim() !== "")).slice(0, 4);
+
+            rows.forEach(row => {
+              const card = document.createElement("div");
+              card.className = "product-card";
+
+              let details = "";
+              for (let key in row) {
+                if (row[key] && row[key].trim() !== "") {
+                  details += `<p><strong>${key}:</strong> ${row[key]}</p>`;
+                }
+              }
+
+              card.innerHTML = `<div class="product-info">${details}</div>`;
+              container.appendChild(card);
+            });
+          }
+        });
+      } catch (err) {
+        console.error("Error fetching featured sheet:", err);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadFeatured);
+  </script>
 </body>
 </html>
