@@ -6,6 +6,70 @@
   <title>Products - Hype24/7</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    /* Spinner Styling */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: #555;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ddd;
+      border-top: 4px solid #111;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Product grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .product-card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+    }
+    .product-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .product-card p {
+      margin: 0.3rem 0;
+      font-size: 0.95rem;
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .filters input, .filters select {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -29,15 +93,14 @@
       </select>
     </section>
 
-    <!-- Spinner / Loading message -->
+    <!-- Spinner -->
     <div id="loading" class="loading">
       <div class="spinner"></div>
       <p>Loading products, please wait...</p>
     </div>
 
-    <section id="product-list" class="product-grid" style="display:none;">
-      <!-- Products will be injected here -->
-    </section>
+    <!-- Products Grid -->
+    <section id="product-list" class="product-grid" style="display:none;"></section>
   </main>
 
   <footer>
@@ -68,19 +131,25 @@
       const search = document.getElementById("searchInput").value.toLowerCase();
       const size = document.getElementById("sizeFilter").value;
 
-      products
+      const filtered = products
         .filter(p => (!search || (p.Name && p.Name.toLowerCase().includes(search))))
-        .filter(p => (!size || p.Size === size))
-        .forEach(p => {
-          const card = document.createElement("div");
-          card.className = "product-card";
-          card.innerHTML = `
-            <h3>${p.Name || "Unnamed Product"}</h3>
-            <p><strong>Size:</strong> ${p.Size || "N/A"}</p>
-            <p><strong>Price:</strong> ${p.Price ? `$${p.Price}` : "On Request"}</p>
-          `;
-          list.appendChild(card);
-        });
+        .filter(p => (!size || p.Size === size));
+
+      if (filtered.length === 0) {
+        list.innerHTML = "<p>No products found.</p>";
+        return;
+      }
+
+      filtered.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+          <h3>${p.Name || "Unnamed Product"}</h3>
+          <p><strong>Size:</strong> ${p.Size || "N/A"}</p>
+          <p><strong>Price:</strong> ${p.Price ? `$${p.Price}` : "On Request"}</p>
+        `;
+        list.appendChild(card);
+      });
     }
 
     function loadSheets() {
