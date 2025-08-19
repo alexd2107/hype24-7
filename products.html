@@ -1,68 +1,111 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #fafafa;
-  color: #333;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - Hype24/7</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">Hype24/7</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html" class="active">Shop</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
 
-header {
-  background: #111;
-  color: #fff;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+  <main>
+    <section class="filters">
+      <input type="text" id="searchInput" placeholder="Search products...">
+      <select id="sizeFilter">
+        <option value="">All Sizes</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+      </select>
+    </section>
 
-header nav a {
-  color: #fff;
-  margin-left: 1rem;
-  text-decoration: none;
-}
+    <!-- Spinner / Loading message -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading products, please wait...</p>
+    </div>
 
-header nav a.active {
-  font-weight: bold;
-  text-decoration: underline;
-}
+    <section id="product-list" class="product-grid" style="display:none;">
+      <!-- Products will be injected here -->
+    </section>
+  </main>
 
-.filters {
-  display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f4f4f4;
-}
+  <footer>
+    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
+  </footer>
 
-.filters input,
-.filters select {
-  padding: 0.5rem;
-  font-size: 1rem;
-}
+  <script>
+    const sheetUrls = [
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
+    ];
 
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-  padding: 1rem;
-}
+    let products = [];
 
-.product-card {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  text-align: center;
-}
+    function renderProducts() {
+      const list = document.getElementById("product-list");
+      list.innerHTML = "";
 
-.product-card h3 {
-  margin: 0 0 0.5rem;
-}
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const size = document.getElementById("sizeFilter").value;
 
-footer {
-  text-align: center;
-  padding: 1rem;
-  background: #111;
-  color: #fff;
-  margin-top: 2rem;
-}
+      products
+        .filter(p => (!search || (p.Name && p.Name.toLowerCase().includes(search))))
+        .filter(p => (!size || p.Size === size))
+        .forEach(p => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.innerHTML = `
+            <h3>${p.Name || "Unnamed Product"}</h3>
+            <p><strong>Size:</strong> ${p.Size || "N/A"}</p>
+            <p><strong>Price:</strong> ${p.Price ? `$${p.Price}` : "On Request"}</p>
+          `;
+          list.appendChild(card);
+        });
+    }
+
+    function loadSheets() {
+      let loaded = 0;
+      sheetUrls.forEach(url => {
+        Papa.parse(url, {
+          download: true,
+          header: true,
+          complete: function(results) {
+            products = products.concat(results.data);
+            loaded++;
+            if (loaded === sheetUrls.length) {
+              document.getElementById("loading").style.display = "none";
+              document.getElementById("product-list").style.display = "grid";
+              renderProducts();
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById("searchInput").addEventListener("input", renderProducts);
+    document.getElementById("sizeFilter").addEventListener("change", renderProducts);
+
+    loadSheets();
+  </script>
+</body>
+</html>
