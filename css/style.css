@@ -1,132 +1,53 @@
-/* ===== Global Reset & Typography ===== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ============================
+   Existing styles...
+   ============================ */
 
-body {
-  font-family: "Inter", Arial, sans-serif;
-  background: #f8f9fa;
-  color: #333;
-  line-height: 1.6;
-}
-
-/* ===== Header ===== */
-header {
-  background: #111;
-  color: #fff;
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-header .logo {
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-header nav a {
-  color: #fff;
-  margin-left: 20px;
-  text-decoration: none;
-  font-size: 1rem;
-  transition: color 0.2s ease;
-}
-
-header nav a:hover {
-  color: #ff6b6b;
-}
-
-/* ===== Filters ===== */
-.filters {
-  display: flex;
-  gap: 1rem;
-  margin: 25px auto;
-  max-width: 900px;
-  justify-content: center;
-}
-
-.filters input,
-.filters select {
-  padding: 10px 12px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 250px;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
-}
-
-.filters input:focus,
-.filters select:focus {
-  border-color: #ff6b6b;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255,107,107,0.2);
-}
-
-/* ===== Product Grid ===== */
+/* Product grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
   padding: 20px;
-  max-width: 1300px;
-  margin: 0 auto;
 }
 
-/* ===== Product Card ===== */
 .product-card {
   background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
 }
 
 .product-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.12);
 }
 
-.product-card h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #111;
+/* ============================
+   Size filter (new)
+   ============================ */
+.size-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
 }
 
-.product-card p {
-  margin: 5px 0;
+.size-filter label {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
   font-size: 0.95rem;
-  color: #444;
+  transition: all 0.2s;
 }
 
-.product-card select {
-  margin-top: 10px;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  width: 100%;
-  font-size: 0.95rem;
-  transition: border 0.2s ease;
+.size-filter label:hover {
+  background: #f0f0f0;
 }
 
-.product-card select:focus {
-  border-color: #ff6b6b;
-  outline: none;
-}
-
-/* ===== Footer ===== */
-footer {
-  background: #111;
-  color: #aaa;
-  padding: 20px;
-  text-align: center;
-  margin-top: 40px;
-}
-
-footer p {
-  font-size: 0.9rem;
+.size-filter input {
+  margin-right: 6px;
 }
