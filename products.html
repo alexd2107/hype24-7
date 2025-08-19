@@ -1,96 +1,180 @@
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const productGrid = document.querySelector(".product-grid");
-  const searchInput = document.querySelector("#search");
-  const sizeFilter = document.querySelector("#sizeFilter");
-
-  const csvUrls = [
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv",
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
-  ];
-
-  let allProducts = [];
-
-  // Fetch and parse CSV
-  async function fetchCSV(url) {
-    const response = await fetch(url);
-    const text = await response.text();
-    return Papa.parse(text, { header: true }).data;
-  }
-
-  // Load all CSVs
-  async function loadProducts() {
-    let results = await Promise.all(csvUrls.map(url => fetchCSV(url)));
-    allProducts = results.flat();
-
-    // Build size filter dynamically
-    const sizes = new Set();
-    allProducts.forEach(p => {
-      if (p.Size) {
-        p.Size.split(",").map(s => s.trim()).forEach(s => sizes.add(s));
-      }
-    });
-
-    sizeFilter.innerHTML = [...sizes]
-      .sort((a, b) => parseFloat(a) - parseFloat(b))
-      .map(size => `<option value="${size}">${size}</option>`)
-      .join("");
-
-    renderProducts(allProducts);
-  }
-
-  // Render products
-  function renderProducts(products) {
-    productGrid.innerHTML = "";
-
-    if (products.length === 0) {
-      productGrid.innerHTML = "<p>No products found.</p>";
-      return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - Hype24/7</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <style>
+    /* Spinner Styling */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: #555;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ddd;
+      border-top: 4px solid #111;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
-    products.forEach(product => {
-      const card = document.createElement("div");
-      card.classList.add("product-card");
+    /* Product grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
 
-      card.innerHTML = `
-        <h3>${product.Name || "Unnamed Shoe"}</h3>
-        <p><strong>Price:</strong> ${product.Price || "N/A"}</p>
-        <p><strong>Sizes:</strong> ${product.Size || "N/A"}</p>
-      `;
+    .product-card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+    }
+    .product-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .product-card p {
+      margin: 0.3rem 0;
+      font-size: 0.95rem;
+    }
 
-      productGrid.appendChild(card);
-    });
-  }
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .filters input, .filters select {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Hype24/7</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html" class="active">Shop</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
 
-  // Filter logic
-  function filterProducts() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const selectedSizes = Array.from(sizeFilter.selectedOptions).map(o => o.value);
+  <main>
+    <section class="filters">
+      <input type="text" id="searchInput" placeholder="Search products...">
+      <select id="sizeFilter">
+        <option value="">All Sizes</option>
+        <option value="S">S</option>
+        <option value="M">M</option>
+        <option value="L">L</option>
+        <option value="XL">XL</option>
+      </select>
+    </section>
 
-    let filtered = allProducts.filter(p => {
-      const matchesSearch = p.Name?.toLowerCase().includes(searchTerm);
-      const matchesSize =
-        selectedSizes.length === 0 ||
-        selectedSizes.some(size => p.Size?.includes(size));
-      return matchesSearch && matchesSize;
-    });
+    <!-- Spinner -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading products, please wait...</p>
+    </div>
 
-    renderProducts(filtered);
-  }
+    <!-- Products Grid -->
+    <section id="product-list" class="product-grid" style="display:none;"></section>
+  </main>
 
-  searchInput.addEventListener("input", filterProducts);
-  sizeFilter.addEventListener("change", filterProducts);
+  <footer>
+    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
+  </footer>
 
-  loadProducts();
-});
-</script>
+  <script>
+    const sheetUrls = [
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
+    ];
+
+    let products = [];
+
+    function renderProducts() {
+      const list = document.getElementById("product-list");
+      list.innerHTML = "";
+
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const size = document.getElementById("sizeFilter").value;
+
+      const filtered = products
+        .filter(p => (!search || (p.Name && p.Name.toLowerCase().includes(search))))
+        .filter(p => (!size || p.Size === size));
+
+      if (filtered.length === 0) {
+        list.innerHTML = "<p>No products found.</p>";
+        return;
+      }
+
+      filtered.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+          <h3>${p.Name || "Unnamed Product"}</h3>
+          <p><strong>Size:</strong> ${p.Size || "N/A"}</p>
+          <p><strong>Price:</strong> ${p.Price ? `$${p.Price}` : "On Request"}</p>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function loadSheets() {
+      let loaded = 0;
+      sheetUrls.forEach(url => {
+        Papa.parse(url, {
+          download: true,
+          header: true,
+          complete: function(results) {
+            products = products.concat(results.data);
+            loaded++;
+            if (loaded === sheetUrls.length) {
+              document.getElementById("loading").style.display = "none";
+              document.getElementById("product-list").style.display = "grid";
+              renderProducts();
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById("searchInput").addEventListener("input", renderProducts);
+    document.getElementById("sizeFilter").addEventListener("change", renderProducts);
+
+    loadSheets();
+  </script>
+</body>
+</html>
