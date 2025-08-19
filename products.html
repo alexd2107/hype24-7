@@ -4,38 +4,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shop - Hype24/7</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* ===== Product Grid & Cards ===== */
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin: 20px auto;
+      max-width: 800px;
+      justify-content: center;
+    }
+
+    .filters input,
+    .filters select {
+      padding: 8px;
+      font-size: 1rem;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .product-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .product-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .product-card p {
+      margin: 5px 0;
+    }
+
+    .product-card select {
+      margin-top: 10px;
+      padding: 5px;
+    }
+  </style>
 </head>
 <body>
   <header>
+    <div class="logo">Hype24/7</div>
     <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="products.html">Shop</a></li>
-        <li><a href="about.html">About</a></li>
-      </ul>
+      <a href="index.html">Home</a>
+      <a href="products.html">Shop</a>
+      <a href="about.html">About</a>
     </nav>
   </header>
 
-  <main>
-    <h1>Shop All</h1>
+  <!-- Filters -->
+  <section class="filters">
+    <input type="text" id="search" placeholder="Search products...">
+    <select id="sizeFilter">
+      <option value="">All Sizes</option>
+    </select>
+  </section>
 
-    <!-- Search + Filter Controls -->
-    <div class="controls">
-      <input type="text" id="search" placeholder="Search...">
-      <select id="sizeFilter">
-        <option value="">All Sizes</option>
-      </select>
-    </div>
-
-    <!-- Product Grid -->
-    <div id="products" class="product-grid"></div>
-  </main>
+  <!-- Product Grid -->
+  <section id="products" class="product-grid"></section>
 
   <footer>
-    <p>© 2025 Hype24/7</p>
+    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
     const csvUrls = [
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
@@ -54,71 +97,87 @@
     const productsContainer = document.getElementById("products");
     const searchInput = document.getElementById("search");
     const sizeFilter = document.getElementById("sizeFilter");
-
     let allProducts = [];
 
-    async function fetchCSV(url) {
-      const response = await fetch(url);
-      const text = await response.text();
-      const rows = text.split("\n").slice(1);
-      return rows.map(row => {
-        const cols = row.split(",");
-        return {
-          name: cols[0]?.trim(),
-          size: cols[1]?.trim(),
-          price: cols[2]?.trim()
-        };
-      }).filter(p => p.name);
-    }
-
-    async function loadProducts() {
-      const promises = csvUrls.map(url => fetchCSV(url));
-      const results = await Promise.all(promises);
-      allProducts = results.flat();
-      renderProducts(allProducts);
-      populateSizeFilter(allProducts);
+    function normalizeRow(row) {
+      return {
+        name: row["Product Name"] || row["Name"] || row["Title"] || "Unnamed Product",
+        price: row["Price"] || row["Retail"] || row["Cost"] || "Price on Request",
+        sizes: row["Sizes"] || row["Available Sizes"] || row["Size"] || "",
+      };
     }
 
     function renderProducts(products) {
       productsContainer.innerHTML = "";
+
       products.forEach(p => {
         const card = document.createElement("div");
-        card.classList.add("product-card");
+        card.className = "product-card";
+
+        let sizesDropdown = "";
+        if (p.sizes) {
+          const sizeList = p.sizes.split(/[,/|]/).map(s => s.trim()).filter(Boolean);
+          if (sizeList.length > 0) {
+            sizesDropdown = `<select>${sizeList.map(s => `<option>${s}</option>`).join("")}</select>`;
+          }
+        }
+
         card.innerHTML = `
           <h3>${p.name}</h3>
-          <p><strong>Size:</strong> ${p.size || "N/A"}</p>
-          <p><strong>Price:</strong> ${p.price || "On request"}</p>
+          <p><strong>Price:</strong> ${p.price}</p>
+          ${sizesDropdown}
         `;
         productsContainer.appendChild(card);
       });
     }
 
-    function populateSizeFilter(products) {
-      const sizes = [...new Set(products.map(p => p.size).filter(Boolean))];
-      sizes.sort();
-      sizes.forEach(size => {
-        const option = document.createElement("option");
-        option.value = size;
-        option.textContent = size;
-        sizeFilter.appendChild(option);
-      });
-    }
-
-    function filterProducts() {
+    function updateFilters() {
       const query = searchInput.value.toLowerCase();
       const size = sizeFilter.value;
       const filtered = allProducts.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(query);
-        const matchesSize = !size || p.size === size;
+        const matchesSize = !size || (p.sizes && p.sizes.includes(size));
         return matchesSearch && matchesSize;
       });
       renderProducts(filtered);
     }
 
-    searchInput.addEventListener("input", filterProducts);
-    sizeFilter.addEventListener("change", filterProducts);
+    function loadAllCSVs() {
+      let loaded = 0;
+      csvUrls.forEach(url => {
+        Papa.parse(url, {
+          download: true,
+          header: true,
+          complete: results => {
+            const rows = results.data.filter(r => Object.values(r).some(v => v));
+            rows.forEach(r => allProducts.push(normalizeRow(r)));
 
-    loadProducts();
+            loaded++;
+            if (loaded === csvUrls.length) {
+              const sizeSet = new Set();
+              allProducts.forEach(p => {
+                if (p.sizes) {
+                  p.sizes.split(/[,/|]/).map(s => s.trim()).forEach(s => sizeSet.add(s));
+                }
+              });
+              sizeSet.forEach(s => {
+                const opt = document.createElement("option");
+                opt.value = s;
+                opt.textContent = s;
+                sizeFilter.appendChild(opt);
+              });
+
+              renderProducts(allProducts);
+            }
+          }
+        });
+      });
+    }
+
+    searchInput.addEventListener("input", updateFilters);
+    sizeFilter.addEventListener("change", updateFilters);
+
+    loadAllCSVs();
   </script>
 </body>
 </html>
