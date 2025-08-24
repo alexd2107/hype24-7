@@ -1,26 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sneaker Inventory</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <header>
-    <h1>Sneaker Inventory</h1>
-    <input type="text" id="searchBar" placeholder="Search sneakers...">
+    <h1>Sneaker Shop</h1>
+    <input type="text" id="searchBar" placeholder="Search sneakers..."/>
   </header>
 
   <section class="filters">
     <h3>Filter by Size</h3>
-    <div id="sizeFilter"></div>
+    <div class="size-filter"></div>
   </section>
 
-  <main>
-    <div id="productGrid" class="product-grid"></div>
-  </main>
+  <main class="product-grid"></main>
 
   <script>
     const csvUrls = [
@@ -38,26 +36,26 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
-    const productGrid = document.getElementById("productGrid");
-    const sizeFilter = document.getElementById("sizeFilter");
+    const productGrid = document.querySelector(".product-grid");
+    const sizeFilter = document.querySelector(".size-filter");
     const searchBar = document.getElementById("searchBar");
-
     let allProducts = [];
 
     async function fetchCSV(url) {
       const response = await fetch(url);
-      const text = await response.text();
-      return Papa.parse(text, { header: true }).data;
+      const data = await response.text();
+      return Papa.parse(data, { header: true }).data;
     }
 
     async function loadProducts() {
-      let products = [];
       for (const url of csvUrls) {
-        const result = await fetchCSV(url);
-        products = products.concat(result);
+        try {
+          const products = await fetchCSV(url);
+          allProducts = allProducts.concat(products.filter(p => p.name && p.price));
+        } catch (err) {
+          console.error("Error loading CSV:", err);
+        }
       }
-      // filter out empties
-      allProducts = products.filter(p => p.name && p.price);
       renderProducts(allProducts);
       populateSizes(allProducts);
     }
@@ -85,27 +83,33 @@
       products.forEach(p => {
         if (p.size) sizes.add(p.size);
       });
+
       sizeFilter.innerHTML = "";
-      sizes.forEach(size => {
-        const label = document.createElement("label");
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.value = size;
-        input.addEventListener("change", applyFilters);
-        label.appendChild(input);
-        label.append(size);
-        sizeFilter.appendChild(label);
+      const select = document.createElement("select");
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = "All Sizes";
+      select.appendChild(defaultOption);
+
+      Array.from(sizes).sort().forEach(size => {
+        const option = document.createElement("option");
+        option.value = size;
+        option.textContent = size;
+        select.appendChild(option);
       });
+
+      select.addEventListener("change", applyFilters);
+      sizeFilter.appendChild(select);
     }
 
     function applyFilters() {
-      const checked = Array.from(sizeFilter.querySelectorAll("input:checked")).map(i => i.value);
+      const selectedSize = sizeFilter.querySelector("select").value;
       const search = searchBar.value.toLowerCase();
 
       let filtered = allProducts;
 
-      if (checked.length) {
-        filtered = filtered.filter(p => p.size && checked.includes(p.size));
+      if (selectedSize) {
+        filtered = filtered.filter(p => p.size === selectedSize);
       }
 
       if (search) {
