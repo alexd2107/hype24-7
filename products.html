@@ -1,127 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sneaker Inventory</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-</head>
-<body>
-  <header>
-    <h1>Sneaker Shop</h1>
-    <input type="text" id="searchBar" placeholder="Search sneakers..."/>
-  </header>
+/* Reset & base */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f8f9fa;
+  color: #333;
+}
 
-  <section class="filters">
-    <h3>Filter by Size</h3>
-    <div class="size-filter"></div>
-  </section>
+/* Header */
+header {
+  background: #111;
+  color: #fff;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
-  <main class="product-grid"></main>
+header h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
 
-  <script>
-    const csvUrls = [
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
-    ];
+header input {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 250px;
+  max-width: 100%;
+}
 
-    const productGrid = document.querySelector(".product-grid");
-    const sizeFilter = document.querySelector(".size-filter");
-    const searchBar = document.getElementById("searchBar");
-    let allProducts = [];
+/* Filters */
+.filters {
+  background: #fff;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+}
 
-    async function fetchCSV(url) {
-      const response = await fetch(url);
-      const data = await response.text();
-      return Papa.parse(data, { header: true }).data;
-    }
+.filters h3 {
+  margin: 0 0 0.5rem;
+}
 
-    async function loadProducts() {
-      for (const url of csvUrls) {
-        try {
-          const products = await fetchCSV(url);
-          allProducts = allProducts.concat(products.filter(p => p.name && p.price));
-        } catch (err) {
-          console.error("Error loading CSV:", err);
-        }
-      }
-      renderProducts(allProducts);
-      populateSizes(allProducts);
-    }
+.filters select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 200px;
+  max-width: 100%;
+}
 
-    function renderProducts(products) {
-      productGrid.innerHTML = "";
-      if (!products.length) {
-        productGrid.innerHTML = "<p>No sneakers found.</p>";
-        return;
-      }
-      products.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.innerHTML = `
-          <h3>${p.name}</h3>
-          <p><strong>Price:</strong> ${p.price}</p>
-          <p><strong>Size:</strong> ${p.size || "N/A"}</p>
-        `;
-        productGrid.appendChild(card);
-      });
-    }
+/* Product grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
 
-    function populateSizes(products) {
-      const sizes = new Set();
-      products.forEach(p => {
-        if (p.size) sizes.add(p.size);
-      });
+/* Product card */
+.product-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 1rem;
+  transition: transform 0.2s ease;
+}
 
-      sizeFilter.innerHTML = "";
-      const select = document.createElement("select");
-      const defaultOption = document.createElement("option");
-      defaultOption.value = "";
-      defaultOption.textContent = "All Sizes";
-      select.appendChild(defaultOption);
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
 
-      Array.from(sizes).sort().forEach(size => {
-        const option = document.createElement("option");
-        option.value = size;
-        option.textContent = size;
-        select.appendChild(option);
-      });
+.product-card h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
 
-      select.addEventListener("change", applyFilters);
-      sizeFilter.appendChild(select);
-    }
-
-    function applyFilters() {
-      const selectedSize = sizeFilter.querySelector("select").value;
-      const search = searchBar.value.toLowerCase();
-
-      let filtered = allProducts;
-
-      if (selectedSize) {
-        filtered = filtered.filter(p => p.size === selectedSize);
-      }
-
-      if (search) {
-        filtered = filtered.filter(p => p.name && p.name.toLowerCase().includes(search));
-      }
-
-      renderProducts(filtered);
-    }
-
-    searchBar.addEventListener("input", applyFilters);
-
-    loadProducts();
-  </script>
-</body>
-</html>
+.product-card p {
+  margin: 0.3rem 0;
+}
