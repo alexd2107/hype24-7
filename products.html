@@ -1,198 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shop Sneakers - Hype24/7</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f9f9f9;
-      color: #333;
-    }
-    header, footer {
-      background: #004d4d;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    nav a {
-      color: white;
-      margin: 0 1rem;
-      text-decoration: none;
-    }
-    h1 {
-      text-align: center;
-      margin-top: 1rem;
-    }
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin: 1.5rem auto;
-      max-width: 800px;
-    }
-    .controls input, .controls select {
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1.5rem;
-      padding: 1.5rem;
-      max-width: 1200px;
-      margin: auto;
-    }
-    .card {
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-    }
-    .card h3 {
-      margin: 0.5rem 0;
-      font-size: 1.1rem;
-    }
-    .card p {
-      margin: 0.25rem 0;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sneaker Inventory</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <header>
-    <h2>Hype24/7</h2>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="products.html">Shop</a>
-      <a href="about.html">About</a>
-    </nav>
+    <h1>Sneaker Inventory</h1>
+    <input type="text" id="searchBar" placeholder="Search sneakers...">
   </header>
 
-  <h1>Shop Sneakers</h1>
+  <section class="filters">
+    <h3>Filter by Size</h3>
+    <div id="sizeFilter"></div>
+  </section>
 
-  <div class="controls">
-    <input type="text" id="searchBar" placeholder="Search by name..."/>
-    <select id="sizeFilter">
-      <option value="">All Sizes</option>
-    </select>
-  </div>
-
-  <div class="product-grid" id="productGrid"></div>
-
-  <footer>
-    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
-  </footer>
-
-  <!-- PapaParse -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <main>
+    <div id="productGrid" class="product-grid"></div>
+  </main>
 
   <script>
-    // ✅ Add all 12 Google Sheets CSV links here
     const csvUrls = [
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_1/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_2/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_3/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_4/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_5/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_6/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_7/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_8/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_9/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_10/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_11/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/CSV_LINK_12/pub?output=csv"
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
+
+    const productGrid = document.getElementById("productGrid");
+    const sizeFilter = document.getElementById("sizeFilter");
+    const searchBar = document.getElementById("searchBar");
 
     let allProducts = [];
 
     async function fetchCSV(url) {
-      return new Promise((resolve, reject) => {
-        Papa.parse(url, {
-          download: true,
-          header: true,
-          complete: results => resolve(results.data),
-          error: err => reject(err)
-        });
-      });
+      const response = await fetch(url);
+      const text = await response.text();
+      return Papa.parse(text, { header: true }).data;
     }
 
     async function loadProducts() {
       let products = [];
       for (const url of csvUrls) {
-        try {
-          const result = await fetchCSV(url);
-          products = products.concat(result);
-        } catch (err) {
-          console.error("Error loading CSV:", err);
-        }
+        const result = await fetchCSV(url);
+        products = products.concat(result);
       }
-      allProducts = products.filter(p => p.Name && p.Size && p.Price); // ensure data is valid
-      populateSizeFilter(allProducts);
+      // filter out empties
+      allProducts = products.filter(p => p.name && p.price);
       renderProducts(allProducts);
+      populateSizes(allProducts);
     }
 
     function renderProducts(products) {
-      const grid = document.getElementById("productGrid");
-      grid.innerHTML = "";
-
-      if (products.length === 0) {
-        grid.innerHTML = "<p>No sneakers found.</p>";
+      productGrid.innerHTML = "";
+      if (!products.length) {
+        productGrid.innerHTML = "<p>No sneakers found.</p>";
         return;
       }
-
-      products.forEach(product => {
+      products.forEach(p => {
         const card = document.createElement("div");
-        card.className = "card";
+        card.className = "product-card";
         card.innerHTML = `
-          <h3>${product.Name}</h3>
-          <p><strong>Size:</strong> ${product.Size}</p>
-          <p><strong>Price:</strong> $${product.Price}</p>
+          <h3>${p.name}</h3>
+          <p><strong>Price:</strong> ${p.price}</p>
+          <p><strong>Size:</strong> ${p.size || "N/A"}</p>
         `;
-        grid.appendChild(card);
+        productGrid.appendChild(card);
       });
     }
 
-    function populateSizeFilter(products) {
-      const sizeFilter = document.getElementById("sizeFilter");
-      const sizes = [...new Set(products.map(p => p.Size))].sort((a,b)=>a-b);
+    function populateSizes(products) {
+      const sizes = new Set();
+      products.forEach(p => {
+        if (p.size) sizes.add(p.size);
+      });
+      sizeFilter.innerHTML = "";
       sizes.forEach(size => {
-        const option = document.createElement("option");
-        option.value = size;
-        option.textContent = size;
-        sizeFilter.appendChild(option);
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = size;
+        input.addEventListener("change", applyFilters);
+        label.appendChild(input);
+        label.append(size);
+        sizeFilter.appendChild(label);
       });
     }
 
-    // Filters
-    document.getElementById("searchBar").addEventListener("input", e => {
-      const query = e.target.value.toLowerCase();
-      const size = document.getElementById("sizeFilter").value;
-      const filtered = allProducts.filter(p =>
-        p.Name.toLowerCase().includes(query) &&
-        (size === "" || p.Size === size)
-      );
-      renderProducts(filtered);
-    });
+    function applyFilters() {
+      const checked = Array.from(sizeFilter.querySelectorAll("input:checked")).map(i => i.value);
+      const search = searchBar.value.toLowerCase();
 
-    document.getElementById("sizeFilter").addEventListener("change", e => {
-      const size = e.target.value;
-      const query = document.getElementById("searchBar").value.toLowerCase();
-      const filtered = allProducts.filter(p =>
-        p.Name.toLowerCase().includes(query) &&
-        (size === "" || p.Size === size)
-      );
-      renderProducts(filtered);
-    });
+      let filtered = allProducts;
 
-    // Load on start
+      if (checked.length) {
+        filtered = filtered.filter(p => p.size && checked.includes(p.size));
+      }
+
+      if (search) {
+        filtered = filtered.filter(p => p.name && p.name.toLowerCase().includes(search));
+      }
+
+      renderProducts(filtered);
+    }
+
+    searchBar.addEventListener("input", applyFilters);
+
     loadProducts();
   </script>
 </body>
