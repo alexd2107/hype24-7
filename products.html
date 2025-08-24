@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shop - Hype24/7</title>
+  <title>Shop Sneakers - Hype24/7</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,22 +12,26 @@
     <div class="logo">Hype24/7</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="products.html">Shop</a>
+      <a href="products.html" class="active">Shop</a>
       <a href="about.html">About</a>
     </nav>
   </header>
 
-  <!-- Page title -->
-  <h1 style="text-align:center; margin:30px 0;">Shop Sneakers</h1>
+  <!-- Shop Section -->
+  <section>
+    <h1 style="text-align:center;">Shop Sneakers</h1>
 
-  <!-- Filters -->
-  <div class="filters">
-    <input type="text" id="searchInput" placeholder="Search by name...">
-  </div>
-  <div class="size-filter"></div>
+    <!-- Filters -->
+    <div class="filters">
+      <input type="text" id="searchInput" placeholder="Search by name...">
+    </div>
 
-  <!-- Product grid -->
-  <div class="product-grid"></div>
+    <!-- Size Filter -->
+    <div class="size-filter" id="sizeFilter"></div>
+
+    <!-- Product Grid -->
+    <div class="product-grid" id="productGrid"></div>
+  </section>
 
   <!-- Footer -->
   <footer>
@@ -37,26 +41,17 @@
   <!-- PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
+  <!-- Product Script -->
   <script>
     const csvUrls = [
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv"
     ];
-
-    const productGrid = document.querySelector(".product-grid");
-    const sizeFilterContainer = document.querySelector(".size-filter");
+    const productGrid = document.getElementById("productGrid");
+    const sizeFilterContainer = document.getElementById("sizeFilter");
     const searchInput = document.getElementById("searchInput");
+
     let allProducts = [];
+    let selectedSizes = new Set();
 
     async function fetchCSV(url) {
       const response = await fetch(url);
@@ -65,76 +60,74 @@
     }
 
     async function loadProducts() {
+      let products = [];
       for (const url of csvUrls) {
-        const products = await fetchCSV(url);
-        allProducts = allProducts.concat(products);
+        const result = await fetchCSV(url);
+        products = products.concat(result);
       }
-      populateSizeFilter(allProducts);
-      applyFilters();
+      allProducts = products.filter(p => p.Name && p.Price); // filter out blanks
+      renderSizeFilter(allProducts);
+      renderProducts(allProducts);
     }
 
     function renderProducts(products) {
       productGrid.innerHTML = "";
-      if (!products.length) {
-        productGrid.innerHTML = "<p>No products found.</p>";
-        return;
-      }
       products.forEach(p => {
-        const sizeValue = p.Size || p.Sizes || "N/A"; // handle both cases
         if (!p.Name) return;
+        const sizeValue = p.Size || p.Sizes || "N/A";
         const card = document.createElement("div");
         card.className = "product-card";
         card.innerHTML = `
           <h3>${p.Name}</h3>
-          <p><strong>Price:</strong> ${p.Price || "N/A"}</p>
-          <p><strong>Sizes:</strong> ${sizeValue}</p>
+          <p><strong>Price:</strong> ${p.Price}</p>
+          <p><strong>Size:</strong> ${sizeValue}</p>
         `;
         productGrid.appendChild(card);
       });
     }
 
-    function populateSizeFilter(products) {
+    function renderSizeFilter(products) {
       const sizes = new Set();
       products.forEach(p => {
-        const sizeValue = p.Size || p.Sizes;
-        if (sizeValue) {
-          sizeValue.split(",").map(s => s.trim()).forEach(size => sizes.add(size));
-        }
+        const sizeValue = (p.Size || p.Sizes || "").split(",");
+        sizeValue.forEach(s => {
+          if (s.trim()) sizes.add(s.trim());
+        });
       });
 
       sizeFilterContainer.innerHTML = "";
       sizes.forEach(size => {
         const label = document.createElement("label");
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.value = size;
-        input.addEventListener("change", applyFilters);
-        label.appendChild(input);
-        label.append(" " + size);
+        label.innerHTML = `<input type="checkbox" value="${size}"> ${size}`;
+        label.querySelector("input").addEventListener("change", e => {
+          if (e.target.checked) {
+            selectedSizes.add(size);
+          } else {
+            selectedSizes.delete(size);
+          }
+          filterProducts();
+        });
         sizeFilterContainer.appendChild(label);
       });
     }
 
-    function applyFilters() {
-      const checked = Array.from(sizeFilterContainer.querySelectorAll("input:checked"))
-        .map(i => i.value.toLowerCase());
-      const searchTerm = searchInput.value.toLowerCase();
+    function filterProducts() {
+      const query = searchInput.value.toLowerCase();
+      let filtered = allProducts.filter(p =>
+        p.Name.toLowerCase().includes(query)
+      );
 
-      const filtered = allProducts.filter(p => {
-        const sizeValue = (p.Size || p.Sizes || "").toLowerCase();
-        const matchSize = checked.length
-          ? checked.some(size => sizeValue.split(",").map(s => s.trim()).includes(size))
-          : true;
-        const matchSearch = searchTerm
-          ? p.Name && p.Name.toLowerCase().includes(searchTerm)
-          : true;
-        return matchSize && matchSearch;
-      });
+      if (selectedSizes.size > 0) {
+        filtered = filtered.filter(p => {
+          const sizeValue = (p.Size || p.Sizes || "").split(",");
+          return sizeValue.some(s => selectedSizes.has(s.trim()));
+        });
+      }
 
       renderProducts(filtered);
     }
 
-    searchInput.addEventListener("input", applyFilters);
+    searchInput.addEventListener("input", filterProducts);
 
     loadProducts();
   </script>
