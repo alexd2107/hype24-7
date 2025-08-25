@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sneaker Inventory</title>
   <style>
     /* Reset & base */
@@ -24,10 +24,12 @@
       align-items: center;
       flex-wrap: wrap;
     }
+
     header h1 {
       font-size: 1.5rem;
       margin: 0;
     }
+
     header input {
       padding: 0.5rem;
       border-radius: 6px;
@@ -42,9 +44,11 @@
       padding: 1rem;
       border-bottom: 1px solid #ddd;
     }
+
     .filters h3 {
       margin: 0 0 0.5rem;
     }
+
     .filters select {
       padding: 0.5rem;
       border-radius: 6px;
@@ -68,32 +72,47 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       padding: 1rem;
       transition: transform 0.2s ease;
+      text-align: center;
     }
+
     .product-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
+
     .product-card h3 {
-      margin-top: 0;
-      font-size: 1.2rem;
+      margin-top: 0.5rem;
+      font-size: 1.1rem;
     }
+
     .product-card p {
       margin: 0.3rem 0;
     }
 
-    /* Spinner overlay */
-    #loadingOverlay {
+    /* Product image */
+    .product-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+    }
+
+    /* Loading spinner */
+    .spinner-overlay {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      right: 0;
+      bottom: 0;
       background: rgba(255,255,255,0.9);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
+      z-index: 9999;
     }
+
     .spinner {
       border: 6px solid #f3f3f3;
       border-top: 6px solid #111;
@@ -102,29 +121,33 @@
       height: 50px;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <div id="loadingOverlay"><div class="spinner"></div></div>
-
   <header>
     <h1>Sneaker Inventory</h1>
-    <input type="text" id="searchBar" placeholder="Search sneakers...">
+    <input type="text" id="search" placeholder="Search sneakers...">
   </header>
 
-  <section class="filters">
+  <div class="filters">
     <h3>Filter by Size</h3>
     <select id="sizeFilter">
       <option value="">All Sizes</option>
     </select>
-  </section>
+  </div>
 
-  <main class="product-grid" id="productGrid"></main>
+  <div class="product-grid"></div>
 
-  <!-- PapaParse -->
+  <!-- Loading Spinner -->
+  <div class="spinner-overlay" id="spinner">
+    <div class="spinner"></div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
     const csvUrls = [
@@ -139,39 +162,42 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvrg3WWc13koS1L66yAU33LWLIuSSR_vdbOiFgrg7z3HrGOp_ElMh_0d_faocQLSH6IWtmGvfUviDI/pub?gid=1978474466&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvrg3WWc13koS1L66yAU33LWLIuSSR_vdbOiFgrg7z3HrGOp_ElMh_0d_faocQLSH6IWtmGvfUviDI/pub?gid=1649195567&single=true&output=csv"
     ];
 
-    const productGrid = document.getElementById("productGrid");
-    const searchBar = document.getElementById("searchBar");
+    const productGrid = document.querySelector(".product-grid");
     const sizeFilter = document.getElementById("sizeFilter");
-    const loadingOverlay = document.getElementById("loadingOverlay");
+    const searchInput = document.getElementById("search");
+    const spinner = document.getElementById("spinner");
+
     let allProducts = [];
 
+    // Fetch & parse CSV
     async function fetchCSV(url) {
       const response = await fetch(url);
-      const text = await response.text();
-      return Papa.parse(text, { header: true }).data;
+      const data = await response.text();
+      return Papa.parse(data, { header: true }).data;
     }
 
+    // Load all products
     async function loadProducts() {
-      let products = [];
-      for (const url of csvUrls) {
-        try {
-          const data = await fetchCSV(url);
-          products = products.concat(data);
-        } catch (err) {
-          console.error("Error loading", url, err);
+      try {
+        for (const url of csvUrls) {
+          const products = await fetchCSV(url);
+          allProducts = allProducts.concat(products);
         }
+        populateSizeFilter(allProducts);
+        renderProducts(allProducts);
+      } catch (err) {
+        console.error("Error loading products:", err);
+        productGrid.innerHTML = "<p>Failed to load products.</p>";
+      } finally {
+        spinner.style.display = "none"; // Hide spinner
       }
-      allProducts = products.filter(p => p.name && p.price);
-      populateSizeFilter(allProducts);
-      renderProducts(allProducts);
-      loadingOverlay.style.display = "none"; // hide spinner
     }
 
+    // Render products
     function renderProducts(products) {
       productGrid.innerHTML = "";
       if (products.length === 0) {
@@ -179,17 +205,26 @@
         return;
       }
       products.forEach(p => {
+        if (!p.name) return; // skip empty rows
+
         const card = document.createElement("div");
         card.className = "product-card";
+
+        const imageUrl = p.pictures ? p.pictures : "https://via.placeholder.com/220x180?text=No+Image";
+
         card.innerHTML = `
+          <a href="${imageUrl}" target="_blank">
+            <img src="${imageUrl}" alt="${p.name}">
+          </a>
           <h3>${p.name}</h3>
-          <p><strong>Price:</strong> ${p.price}</p>
+          <p><strong>Price:</strong> ${p.price || "N/A"}</p>
           <p><strong>Size:</strong> ${p.size || "N/A"}</p>
         `;
         productGrid.appendChild(card);
       });
     }
 
+    // Populate size filter
     function populateSizeFilter(products) {
       const sizes = new Set();
       products.forEach(p => {
@@ -197,8 +232,9 @@
           p.size.split(",").map(s => s.trim()).forEach(size => sizes.add(size));
         }
       });
+
       sizeFilter.innerHTML = '<option value="">All Sizes</option>';
-      [...sizes].sort().forEach(size => {
+      Array.from(sizes).sort().forEach(size => {
         const option = document.createElement("option");
         option.value = size;
         option.textContent = size;
@@ -206,23 +242,25 @@
       });
     }
 
+    // Apply filters
     function applyFilters() {
-      const searchTerm = searchBar.value.toLowerCase();
-      const sizeValue = sizeFilter.value;
-      let filtered = allProducts.filter(p =>
-        p.name.toLowerCase().includes(searchTerm)
-      );
-      if (sizeValue) {
-        filtered = filtered.filter(p =>
-          p.size && p.size.split(",").map(s => s.trim()).includes(sizeValue)
-        );
-      }
+      const searchTerm = searchInput.value.toLowerCase();
+      const selectedSize = sizeFilter.value;
+
+      let filtered = allProducts.filter(p => {
+        const matchesSearch = p.name && p.name.toLowerCase().includes(searchTerm);
+        const matchesSize = selectedSize ? (p.size && p.size.split(",").map(s => s.trim()).includes(selectedSize)) : true;
+        return matchesSearch && matchesSize;
+      });
+
       renderProducts(filtered);
     }
 
-    searchBar.addEventListener("input", applyFilters);
+    // Event listeners
+    searchInput.addEventListener("input", applyFilters);
     sizeFilter.addEventListener("change", applyFilters);
 
+    // Initialize
     loadProducts();
   </script>
 </body>
