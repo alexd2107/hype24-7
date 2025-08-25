@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sneaker Inventory</title>
 
-  <!-- ✅ CSS inside the HTML -->
   <style>
     /* Reset & base */
     body {
@@ -93,6 +92,29 @@
     .product-card p {
       margin: 0.3rem 0;
     }
+
+    /* Loading Spinner */
+    .spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+
+    .spinner div {
+      width: 40px;
+      height: 40px;
+      border: 5px solid #ccc;
+      border-top-color: #111;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 <body>
@@ -108,9 +130,15 @@
     </select>
   </section>
 
-  <main class="product-grid"></main>
+  <!-- Spinner shows until products load -->
+  <div id="loading" class="spinner">
+    <div></div>
+  </div>
 
-  <!-- ✅ PapaParse for CSV -->
+  <!-- Product grid -->
+  <main class="product-grid" style="display:none;"></main>
+
+  <!-- PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
   <script>
@@ -126,32 +154,35 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv",
+      /* ✅ Added new ones */
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvrg3WWc13koS1L66yAU33LWLIuSSR_vdbOiFgrg7z3HrGOp_ElMh_0d_faocQLSH6IWtmGvfUviDI/pub?gid=1978474466&single=true&output=csv",
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvrg3WWc13koS1L66yAU33LWLIuSSR_vdbOiFgrg7z3HrGOp_ElMh_0d_faocQLSH6IWtmGvfUviDI/pub?gid=1649195567&single=true&output=csv"
     ];
 
     const productGrid = document.querySelector(".product-grid");
     const sizeFilter = document.getElementById("sizeFilter");
     const searchBar = document.getElementById("searchBar");
+    const loading = document.getElementById("loading");
     let allProducts = [];
 
-    // Fetch & parse CSV
     async function fetchCSV(url) {
       const response = await fetch(url);
       const data = await response.text();
       return Papa.parse(data, { header: true }).data;
     }
 
-    // Load all products
     async function loadProducts() {
       for (const url of csvUrls) {
         const products = await fetchCSV(url);
         allProducts = allProducts.concat(products.filter(p => p.name && p.price));
       }
+      loading.style.display = "none";   // hide spinner
+      productGrid.style.display = "grid"; // show grid
       renderProducts(allProducts);
       populateSizeFilter(allProducts);
     }
 
-    // Render products
     function renderProducts(products) {
       productGrid.innerHTML = "";
       if (products.length === 0) {
@@ -171,7 +202,6 @@
       });
     }
 
-    // Populate size filter dropdown
     function populateSizeFilter(products) {
       const sizes = new Set();
       products.forEach(p => {
@@ -189,7 +219,6 @@
       });
     }
 
-    // Apply filters
     function applyFilters() {
       const searchText = searchBar.value.toLowerCase();
       const selectedSize = sizeFilter.value;
@@ -203,11 +232,9 @@
       renderProducts(filtered);
     }
 
-    // Event listeners
     searchBar.addEventListener("input", applyFilters);
     sizeFilter.addEventListener("change", applyFilters);
 
-    // Initialize
     loadProducts();
   </script>
 </body>
