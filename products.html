@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sneaker Inventory</title>
+
+  <!-- ✅ CSS inside the HTML -->
   <style>
     /* Reset & base */
     body {
@@ -24,10 +26,12 @@
       align-items: center;
       flex-wrap: wrap;
     }
+
     header h1 {
       font-size: 1.5rem;
       margin: 0;
     }
+
     header input {
       padding: 0.5rem;
       border-radius: 6px;
@@ -42,13 +46,21 @@
       padding: 1rem;
       border-bottom: 1px solid #ddd;
       display: flex;
+      align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
     }
+
+    .filters label {
+      font-weight: bold;
+    }
+
     .filters select {
       padding: 0.5rem;
       border-radius: 6px;
       border: 1px solid #ccc;
+      width: 200px;
+      max-width: 100%;
     }
 
     /* Product grid */
@@ -66,78 +78,41 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       padding: 1rem;
       transition: transform 0.2s ease;
-      text-align: center;
     }
+
     .product-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
-    .product-card img {
-      max-width: 100%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-bottom: 0.5rem;
-    }
+
     .product-card h3 {
-      margin: 0.5rem 0 0.2rem;
-      font-size: 1.1rem;
-    }
-    .product-card p {
-      margin: 0.2rem 0;
-      font-size: 0.9rem;
+      margin-top: 0;
+      font-size: 1.2rem;
     }
 
-    /* Loading overlay */
-    #loading {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255,255,255,0.9);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      font-size: 1.2rem;
-      color: #333;
-    }
-    .spinner {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #111;
-      border-radius: 50%;
-      width: 50px; height: 50px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .product-card p {
+      margin: 0.3rem 0;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Sneaker Inventory</h1>
-    <input type="text" id="search" placeholder="Search sneakers..."/>
+    <h1>Sneaker Shop</h1>
+    <input type="text" id="searchBar" placeholder="Search sneakers..." />
   </header>
 
-  <div class="filters">
+  <section class="filters">
+    <label for="sizeFilter">Filter by Size:</label>
     <select id="sizeFilter">
-      <option value="">Filter by size</option>
+      <option value="">All Sizes</option>
     </select>
-  </div>
+  </section>
 
-  <div id="loading">
-    <div class="spinner"></div>
-    <p>Loading sneakers...</p>
-  </div>
+  <main class="product-grid"></main>
 
-  <main>
-    <div class="product-grid" id="productGrid"></div>
-  </main>
+  <!-- ✅ PapaParse for CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
     const csvUrls = [
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
@@ -153,87 +128,86 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
-    let products = [];
+    const productGrid = document.querySelector(".product-grid");
+    const sizeFilter = document.getElementById("sizeFilter");
+    const searchBar = document.getElementById("searchBar");
+    let allProducts = [];
 
-    function fetchCSV(url) {
-      return new Promise((resolve) => {
-        Papa.parse(url, {
-          download: true,
-          header: true,
-          complete: (results) => {
-            const cleaned = results.data
-              .filter(row => row.name && row.size && row.price)
-              .map(row => ({
-                name: row.name.trim(),
-                size: row.size.trim(),
-                price: parseFloat(row.price.replace(/[^0-9.]/g, "")),
-                image: row.image ? row.image.trim() : ""
-              }));
-            resolve(cleaned);
-          }
-        });
-      });
+    // Fetch & parse CSV
+    async function fetchCSV(url) {
+      const response = await fetch(url);
+      const data = await response.text();
+      return Papa.parse(data, { header: true }).data;
     }
 
-    function renderProducts(list) {
-      const grid = document.getElementById("productGrid");
-      grid.innerHTML = "";
+    // Load all products
+    async function loadProducts() {
+      for (const url of csvUrls) {
+        const products = await fetchCSV(url);
+        allProducts = allProducts.concat(products.filter(p => p.name && p.price));
+      }
+      renderProducts(allProducts);
+      populateSizeFilter(allProducts);
+    }
 
-      if (list.length === 0) {
-        grid.innerHTML = "<p>No sneakers found.</p>";
+    // Render products
+    function renderProducts(products) {
+      productGrid.innerHTML = "";
+      if (products.length === 0) {
+        productGrid.innerHTML = "<p>No sneakers found</p>";
         return;
       }
 
-      list.forEach(product => {
+      products.forEach(p => {
         const card = document.createElement("div");
         card.className = "product-card";
         card.innerHTML = `
-          <img src="${product.image || "https://via.placeholder.com/220x180?text=No+Image"}" alt="${product.name}">
-          <h3>${product.name}</h3>
-          <p>Size: ${product.size}</p>
-          <p>Price: $${product.price}</p>
+          <h3>${p.name}</h3>
+          <p><strong>Price:</strong> ${p.price}</p>
+          <p><strong>Size:</strong> ${p.size || "N/A"}</p>
         `;
-        grid.appendChild(card);
+        productGrid.appendChild(card);
       });
     }
 
-    function populateSizeFilter() {
-      const sizeSelect = document.getElementById("sizeFilter");
-      const sizes = [...new Set(products.map(p => p.size))].sort((a,b) => parseFloat(a)-parseFloat(b));
-      sizes.forEach(size => {
+    // Populate size filter dropdown
+    function populateSizeFilter(products) {
+      const sizes = new Set();
+      products.forEach(p => {
+        if (p.size) {
+          p.size.split(",").map(s => s.trim()).forEach(size => sizes.add(size));
+        }
+      });
+
+      sizeFilter.innerHTML = '<option value="">All Sizes</option>';
+      Array.from(sizes).sort().forEach(size => {
         const option = document.createElement("option");
         option.value = size;
         option.textContent = size;
-        sizeSelect.appendChild(option);
+        sizeFilter.appendChild(option);
       });
     }
 
+    // Apply filters
     function applyFilters() {
-      const search = document.getElementById("search").value.toLowerCase();
-      const size = document.getElementById("sizeFilter").value;
-      let filtered = products;
+      const searchText = searchBar.value.toLowerCase();
+      const selectedSize = sizeFilter.value;
 
-      if (search) {
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
-      }
-      if (size) {
-        filtered = filtered.filter(p => p.size === size);
-      }
+      const filtered = allProducts.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(searchText);
+        const matchesSize = !selectedSize || (p.size && p.size.split(",").map(s => s.trim()).includes(selectedSize));
+        return matchesSearch && matchesSize;
+      });
 
       renderProducts(filtered);
     }
 
     // Event listeners
-    document.getElementById("search").addEventListener("input", applyFilters);
-    document.getElementById("sizeFilter").addEventListener("change", applyFilters);
+    searchBar.addEventListener("input", applyFilters);
+    sizeFilter.addEventListener("change", applyFilters);
 
-    // Load all CSVs
-    Promise.all(csvUrls.map(fetchCSV)).then(results => {
-      products = results.flat();
-      renderProducts(products);
-      populateSizeFilter();
-      document.getElementById("loading").style.display = "none";
-    });
+    // Initialize
+    loadProducts();
   </script>
 </body>
 </html>
