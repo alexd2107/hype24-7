@@ -2,19 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sneaker Inventory</title>
+  <title>Shop Sneakers</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
-    /* Reset & base */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: #f8f9fa;
+      background: #f7f7f7;
       color: #333;
     }
-
-    /* Header */
     header {
       background: #111;
       color: #fff;
@@ -22,117 +19,96 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
     }
     header h1 {
-      font-size: 1.5rem;
       margin: 0;
+      font-size: 1.5rem;
     }
     header input {
       padding: 0.5rem;
       border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 250px;
-      max-width: 100%;
+      border: none;
+      width: 200px;
     }
-
-    /* Filters */
     .filters {
       background: #fff;
       padding: 1rem;
-      border-bottom: 1px solid #ddd;
+      margin: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     .filters h3 {
-      margin: 0 0 0.5rem;
+      margin: 0;
     }
     .filters select {
-      padding: 0.5rem;
+      padding: 0.4rem;
       border-radius: 6px;
       border: 1px solid #ccc;
-      width: 200px;
-      max-width: 100%;
     }
-
-    /* Product grid */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 1rem;
       padding: 1rem;
     }
-
-    /* Product card */
     .product-card {
       background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-radius: 12px;
       padding: 1rem;
-      transition: transform 0.2s ease;
       text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .product-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .product-card img {
       max-width: 100%;
-      height: 180px;
-      object-fit: cover;
+      height: auto;
       border-radius: 8px;
       margin-bottom: 0.5rem;
     }
     .product-card h3 {
-      margin-top: 0;
-      font-size: 1.2rem;
+      font-size: 1rem;
+      margin: 0.5rem 0;
     }
     .product-card p {
-      margin: 0.3rem 0;
+      margin: 0.2rem 0;
     }
-
-    /* Spinner */
-    .spinner-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255,255,255,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .spinner {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #111;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: #111;
+      color: #fff;
+      margin-top: 2rem;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
 <body>
   <header>
-    <h1>Sneaker Inventory</h1>
-    <input type="text" id="searchInput" placeholder="Search sneakers...">
+    <h1>Hype24/7</h1>
+    <input type="text" id="searchInput" placeholder="Search by name...">
   </header>
 
   <section class="filters">
-    <h3>Filter by Size</h3>
+    <h3>Filter by Size:</h3>
     <select id="sizeFilter">
       <option value="">All Sizes</option>
     </select>
   </section>
 
-  <div id="spinnerOverlay" class="spinner-overlay">
-    <div class="spinner"></div>
-  </div>
+  <main>
+    <h2 style="text-align:center; margin-top:1rem;">Shop Sneakers</h2>
+    <div id="productGrid" class="product-grid"></div>
+  </main>
 
-  <main class="product-grid"></main>
+  <footer>
+    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
+  </footer>
 
   <script>
     const csvUrls = [
@@ -146,77 +122,47 @@
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvrg3WWc13koS1L66yAU33LWLIuSSR_vdbOiFgrg7z3HrGOp_ElMh_0d_faocQLSH6IWtmGvfUviDI/pub?gid=1978474466&single=true&output=csv",
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvrg3WWc13koS1L66yAU33LWLIuSSR_vdbOiFgrg7z3HrGOp_ElMh_0d_faocQLSH6IWtmGvfUviDI/pub?gid=1649195567&single=true&output=csv"
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
     ];
 
-    const productGrid = document.querySelector(".product-grid");
-    const sizeFilter = document.getElementById("sizeFilter");
+    let products = [];
+    const productGrid = document.getElementById("productGrid");
     const searchInput = document.getElementById("searchInput");
-    const spinnerOverlay = document.getElementById("spinnerOverlay");
+    const sizeFilter = document.getElementById("sizeFilter");
 
-    let allProducts = [];
-
-    async function fetchCSV(url) {
-      const response = await fetch(url);
-      const data = await response.text();
-      return Papa.parse(data, { header: true }).data;
-    }
-
-    async function loadProducts() {
-      spinnerOverlay.style.display = "flex"; // show spinner
-      allProducts = [];
-      for (const url of csvUrls) {
-        try {
-          const products = await fetchCSV(url);
-          allProducts = allProducts.concat(products);
-        } catch (err) {
-          console.error("Error loading CSV:", url, err);
-        }
+    async function loadCSVs() {
+      for (let url of csvUrls) {
+        await new Promise((resolve) => {
+          Papa.parse(url, {
+            download: true,
+            header: true,
+            complete: function(results) {
+              results.data.forEach(row => {
+                if (row.name && row.price && row.size) {
+                  products.push({
+                    name: row.name,
+                    size: row.size,
+                    price: row.price,
+                    image: row.image || "https://via.placeholder.com/220x180?text=No+Image"
+                  });
+                }
+              });
+              resolve();
+            },
+            error: function(err) {
+              console.error("Error parsing", url, err);
+              resolve();
+            }
+          });
+        });
       }
-      populateSizeFilter(allProducts);
-      applyFilters();
-      spinnerOverlay.style.display = "none"; // hide spinner
+      populateSizeFilter();
+      renderProducts();
     }
 
-    function renderProducts(products) {
-      productGrid.innerHTML = "";
-      if (products.length === 0) {
-        productGrid.innerHTML = "<p>No sneakers found.</p>";
-        return;
-      }
-      products.forEach(p => {
-        if (!p.name) return;
-
-        const card = document.createElement("div");
-        card.className = "product-card";
-
-        const imageUrl = p.picture || "https://via.placeholder.com/220x180?text=No+Image";
-
-        card.innerHTML = `
-          <a href="${imageUrl}" target="_blank">
-            <img src="${imageUrl}" alt="${p.name}">
-          </a>
-          <h3>${p.name}</h3>
-          <p><strong>Price:</strong> ${p.price || "N/A"}</p>
-          <p><strong>Size:</strong> ${p.size || "N/A"}</p>
-        `;
-        productGrid.appendChild(card);
-      });
-    }
-
-    function populateSizeFilter(products) {
-      const sizes = new Set();
-      products.forEach(p => {
-        if (p.size) {
-          p.size.split(",").map(s => s.trim()).forEach(size => sizes.add(size));
-        }
-      });
-
-      sizeFilter.innerHTML = '<option value="">All Sizes</option>';
-      Array.from(sizes).sort((a, b) => a.localeCompare(b)).forEach(size => {
+    function populateSizeFilter() {
+      let sizes = [...new Set(products.map(p => p.size))].sort((a,b)=>parseFloat(a)-parseFloat(b));
+      sizes.forEach(size => {
         const option = document.createElement("option");
         option.value = size;
         option.textContent = size;
@@ -224,25 +170,38 @@
       });
     }
 
-    function applyFilters() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const selectedSize = sizeFilter.value;
+    function renderProducts() {
+      productGrid.innerHTML = "";
+      const searchValue = searchInput.value.toLowerCase();
+      const sizeValue = sizeFilter.value;
 
-      let filtered = allProducts.filter(p => p.name && p.name.toLowerCase().includes(searchTerm));
+      let filtered = products.filter(p => 
+        p.name.toLowerCase().includes(searchValue) &&
+        (sizeValue === "" || p.size === sizeValue)
+      );
 
-      if (selectedSize) {
-        filtered = filtered.filter(p =>
-          p.size && p.size.split(",").map(s => s.trim()).includes(selectedSize)
-        );
+      if (filtered.length === 0) {
+        productGrid.innerHTML = "<p>No sneakers found</p>";
+        return;
       }
 
-      renderProducts(filtered);
+      filtered.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+          <img src="${p.image}" alt="${p.name}">
+          <h3>${p.name}</h3>
+          <p><strong>Size:</strong> ${p.size}</p>
+          <p><strong>Price:</strong> $${p.price}</p>
+        `;
+        productGrid.appendChild(card);
+      });
     }
 
-    searchInput.addEventListener("input", applyFilters);
-    sizeFilter.addEventListener("change", applyFilters);
+    searchInput.addEventListener("input", renderProducts);
+    sizeFilter.addEventListener("change", renderProducts);
 
-    loadProducts();
+    loadCSVs();
   </script>
 </body>
 </html>
