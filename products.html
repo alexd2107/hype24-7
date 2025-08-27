@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sneaker Inventory</title>
 
-  <!-- ✅ CSS inside the HTML -->
   <style>
-    /* Reset & base */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -16,7 +14,6 @@
       color: #333;
     }
 
-    /* Header */
     header {
       background: #111;
       color: #fff;
@@ -40,7 +37,6 @@
       max-width: 100%;
     }
 
-    /* Filters */
     .filters {
       background: #fff;
       padding: 1rem;
@@ -63,7 +59,6 @@
       max-width: 100%;
     }
 
-    /* Product grid */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -71,7 +66,6 @@
       padding: 1rem;
     }
 
-    /* Product card */
     .product-card {
       background: #fff;
       border-radius: 10px;
@@ -100,6 +94,28 @@
       margin-bottom: 10px;
       object-fit: cover;
     }
+
+    /* ✅ Loading Spinner */
+    .spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+
+    .spinner div {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ccc;
+      border-top: 4px solid #111;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -115,9 +131,11 @@
     </select>
   </section>
 
-  <main class="product-grid"></main>
+  <!-- ✅ Spinner shows first -->
+  <main class="product-grid">
+    <div class="spinner"><div></div></div>
+  </main>
 
-  <!-- ✅ PapaParse for CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
   <script>
@@ -140,15 +158,14 @@
     const searchBar = document.getElementById("searchBar");
     let allProducts = [];
 
-    // Fetch & parse CSV
     async function fetchCSV(url) {
       const response = await fetch(url);
       const data = await response.text();
       return Papa.parse(data, { header: true }).data;
     }
 
-    // Load all products
     async function loadProducts() {
+      allProducts = [];
       for (const url of csvUrls) {
         const products = await fetchCSV(url);
         allProducts = allProducts.concat(products.filter(p => p.name && p.price));
@@ -157,7 +174,6 @@
       populateSizeFilter(allProducts);
     }
 
-    // Render products (✅ with picture)
     function renderProducts(products) {
       productGrid.innerHTML = "";
       if (products.length === 0) {
@@ -178,7 +194,6 @@
       });
     }
 
-    // Populate size filter dropdown
     function populateSizeFilter(products) {
       const sizes = new Set();
       products.forEach(p => {
@@ -196,7 +211,6 @@
       });
     }
 
-    // Apply filters
     function applyFilters() {
       const searchText = searchBar.value.toLowerCase();
       const selectedSize = sizeFilter.value;
@@ -210,11 +224,10 @@
       renderProducts(filtered);
     }
 
-    // Event listeners
     searchBar.addEventListener("input", applyFilters);
     sizeFilter.addEventListener("change", applyFilters);
 
-    // Initialize
+    // Show spinner at start
     loadProducts();
   </script>
 </body>
