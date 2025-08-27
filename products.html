@@ -93,6 +93,13 @@
     .product-card p {
       margin: 0.3rem 0;
     }
+
+    .product-card img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      object-fit: cover;
+    }
   </style>
 </head>
 <body>
@@ -150,7 +157,7 @@
       populateSizeFilter(allProducts);
     }
 
-    // Render products
+    // Render products (✅ with picture)
     function renderProducts(products) {
       productGrid.innerHTML = "";
       if (products.length === 0) {
@@ -162,6 +169,7 @@
         const card = document.createElement("div");
         card.className = "product-card";
         card.innerHTML = `
+          <img src="${p.picture || ''}" alt="${p.name}" onerror="this.style.display='none'" />
           <h3>${p.name}</h3>
           <p><strong>Price:</strong> ${p.price}</p>
           <p><strong>Size:</strong> ${p.size || "N/A"}</p>
