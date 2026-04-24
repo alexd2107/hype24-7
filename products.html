@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hype 24/7 – Shop</title>
+  <title>HypeLife</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; color: #111; }
 
+    /* HEADER */
     header {
       background: #111; color: #fff;
       padding: 1rem 1.5rem;
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
       position: sticky; top: 0; z-index: 100;
     }
-    header h1 { font-size: 1.4rem; letter-spacing: 1px; }
+    .header-logo { font-size: 1.6rem; font-weight: 900; letter-spacing: 2px; background: linear-gradient(90deg,#ff4500,#ff8c00); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     header input {
       padding: 0.5rem 0.85rem; border-radius: 6px; border: none;
       background: #2a2a2a; color: #fff; width: 240px; max-width: 100%; font-size: 0.9rem;
@@ -32,32 +33,78 @@
       display: flex; align-items: center; justify-content: center;
     }
 
+    /* FILTERS */
     .filters {
       background: #fff; border-bottom: 1px solid #ddd;
       padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
     }
     .filters label { font-size: 0.85rem; color: #555; font-weight: 600; }
     .filters select { padding: 0.45rem 0.75rem; border-radius: 6px; border: 1px solid #ccc; font-size: 0.9rem; cursor: pointer; }
+    .solana-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.72rem; color: #9945FF; font-weight: 600;
+      background: #f3eeff; border-radius: 4px; padding: 0.15rem 0.45rem;
+    }
 
+    /* SECTION TABS */
+    .section-tabs {
+      background: #fff; border-bottom: 2px solid #eee;
+      display: flex; gap: 0; padding: 0 1.5rem;
+    }
+    .tab-btn {
+      padding: 0.9rem 1.5rem; font-size: 1rem; font-weight: 700;
+      border: none; background: none; cursor: pointer; color: #888;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      transition: color 0.18s, border-color 0.18s;
+    }
+    .tab-btn:hover { color: #333; }
+    .tab-btn.active { color: #ff4500; border-bottom-color: #ff4500; }
+
+    /* SECTION CONTENT */
+    .section-content { display: none; }
+    .section-content.active { display: block; }
+
+    /* SECTION HEADER */
+    .section-header {
+      padding: 1.25rem 1.5rem 0.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-header h2 { font-size: 1.3rem; font-weight: 800; }
+    .section-count {
+      background: #f0f0f0; color: #666; border-radius: 20px;
+      padding: 0.2rem 0.65rem; font-size: 0.8rem; font-weight: 600;
+    }
+
+    /* GRID */
     .product-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 1rem; padding: 1.25rem;
+      gap: 1rem; padding: 1rem 1.25rem 2rem;
     }
+
+    /* CARD */
     .product-card {
       background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.09);
       padding: 1rem; text-align: center; display: flex; flex-direction: column; gap: 0.4rem;
       transition: transform 0.18s, box-shadow 0.18s;
     }
     .product-card:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.14); }
-    .product-card img {
-      width: 100%; aspect-ratio: 1; object-fit: cover;
-      border-radius: 8px; margin-bottom: 0.3rem; background: #eee;
+
+    /* FIXED: image no longer forced into square crop */
+    .product-card .img-wrap {
+      width: 100%; background: #f8f8f8; border-radius: 8px;
+      overflow: hidden; margin-bottom: 0.3rem;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 160px;
     }
-    .product-card h3 { font-size: 0.95rem; line-height: 1.3; }
-    .product-card .price { font-size: 1.05rem; font-weight: 700; color: #ff4500; }
+    .product-card img {
+      width: 100%; height: auto; max-height: 220px;
+      object-fit: contain; display: block;
+    }
+    .product-card h3 { font-size: 0.9rem; line-height: 1.3; text-align: left; }
+    .product-card .price { font-size: 1rem; font-weight: 700; color: #ff4500; text-align: left; }
     .product-card .size-tag {
-      font-size: 0.8rem; color: #555; background: #f0f0f0;
-      border-radius: 4px; padding: 0.2rem 0.5rem; display: inline-block;
+      font-size: 0.78rem; color: #555; background: #f0f0f0;
+      border-radius: 4px; padding: 0.2rem 0.5rem; display: inline-block; text-align: left;
     }
     .card-size-select { width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #ddd; font-size: 0.85rem; cursor: pointer; }
     .add-btn {
@@ -68,13 +115,23 @@
     .add-btn:hover { background: #333; }
     .add-btn.added { background: #28a745; }
 
+    /* SPINNER */
     .spinner { grid-column: 1/-1; display: flex; justify-content: center; align-items: center; height: 220px; }
     .spinner div { width: 42px; height: 42px; border: 4px solid #ddd; border-top-color: #ff4500; border-radius: 50%; animation: spin 0.85s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* EMPTY SECTION */
+    .empty-section {
+      text-align: center; padding: 4rem 2rem; color: #bbb;
+    }
+    .empty-section .es-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .empty-section p { font-size: 0.95rem; }
+
+    /* CART OVERLAY */
     #cartOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: none; opacity: 0; transition: opacity 0.25s; }
     #cartOverlay.open { display: block; opacity: 1; }
 
+    /* CART DRAWER */
     #cartDrawer {
       position: fixed; top: 0; right: -440px; width: min(440px, 100vw);
       height: 100vh; background: #fff; z-index: 201; display: flex; flex-direction: column;
@@ -87,7 +144,7 @@
     #cartItems { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
 
     .cart-item { display: flex; gap: 0.75rem; align-items: center; background: #f9f9f9; border-radius: 8px; padding: 0.65rem; border: 1px solid #eee; }
-    .cart-item img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; background: #eee; flex-shrink: 0; }
+    .cart-item img { width: 64px; height: 64px; object-fit: contain; border-radius: 6px; background: #f0f0f0; flex-shrink: 0; }
     .cart-item-info { flex: 1; min-width: 0; }
     .ci-name { font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
     .ci-size { font-size: 0.75rem; color: #777; }
@@ -102,37 +159,24 @@
     .cart-total { display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; }
     .cart-total-crypto { display: flex; justify-content: space-between; font-size: 0.85rem; color: #777; }
 
-    /* CHECKOUT PANEL */
     #checkoutPanel { display: none; flex-direction: column; gap: 0.75rem; }
     #checkoutPanel.open { display: flex; }
     .checkout-title { font-size: 0.85rem; font-weight: 600; color: #555; text-align: center; }
 
-    /* Wallet connect button */
     #connectWalletBtn {
       width: 100%; padding: 0.75rem; border-radius: 10px; border: none;
       background: linear-gradient(135deg, #9945FF, #14F195);
       color: #fff; font-size: 0.95rem; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-      transition: opacity 0.18s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: opacity 0.18s;
     }
     #connectWalletBtn:hover { opacity: 0.88; }
-    #walletInfo {
-      display: none; background: #f0fff4; border: 1px solid #14F195;
-      border-radius: 8px; padding: 0.6rem 0.9rem;
-      font-size: 0.8rem; color: #333;
-    }
+    #walletInfo { display: none; background: #f0fff4; border: 1px solid #14F195; border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.8rem; color: #333; }
     #walletInfo span { font-weight: 700; color: #9945FF; }
 
-    /* Currency toggle */
     .currency-toggle { display: flex; gap: 0.5rem; }
-    .cur-btn {
-      flex: 1; padding: 0.55rem; border-radius: 8px; border: 2px solid #eee;
-      background: #fff; font-size: 0.85rem; font-weight: 700; cursor: pointer;
-      transition: all 0.18s;
-    }
+    .cur-btn { flex: 1; padding: 0.55rem; border-radius: 8px; border: 2px solid #eee; background: #fff; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.18s; }
     .cur-btn.active { border-color: #9945FF; background: #f3eeff; color: #9945FF; }
 
-    /* Pay buttons */
     .pay-crypto-btn {
       width: 100%; padding: 0.75rem; border-radius: 10px; border: none;
       font-size: 0.95rem; font-weight: 700; cursor: pointer;
@@ -144,9 +188,7 @@
     #payUsdcBtn { background: linear-gradient(135deg, #2775CA, #14F195); }
     .pay-crypto-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    #checkoutBtn, #backBtn {
-      border: none; border-radius: 8px; padding: 0.7rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.18s;
-    }
+    #checkoutBtn, #backBtn { border: none; border-radius: 8px; padding: 0.7rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.18s; }
     #checkoutBtn { background: #ff4500; color: #fff; }
     #checkoutBtn:hover { background: #e03e00; }
     #backBtn { background: #f0f0f0; color: #333; }
@@ -155,11 +197,8 @@
     .empty-cart { text-align: center; color: #aaa; padding: 3rem 1rem; font-size: 0.95rem; }
     .empty-cart span { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
 
-    /* MODAL */
-    .modal-bg {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
-      z-index: 300; display: none; align-items: center; justify-content: center;
-    }
+    /* MODALS */
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; display: none; align-items: center; justify-content: center; }
     .modal-bg.open { display: flex; }
     .modal-box {
       background: #fff; border-radius: 16px; padding: 2rem 1.75rem;
@@ -172,30 +211,18 @@
     .modal-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
     .modal-box p { color: #555; font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.5; }
     .modal-box .sig { font-size: 0.7rem; color: #aaa; word-break: break-all; margin: 0.5rem 0; }
-    .modal-close {
-      background: #111; color: #fff; border: none; border-radius: 8px;
-      padding: 0.65rem 2rem; font-size: 0.95rem; font-weight: 600;
-      cursor: pointer; margin-top: 1rem; transition: background 0.18s;
-    }
+    .modal-close { background: #111; color: #fff; border: none; border-radius: 8px; padding: 0.65rem 2rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: background 0.18s; }
     .modal-close:hover { background: #333; }
 
-    /* tx status */
     #txStatus { font-size: 0.82rem; text-align: center; color: #9945FF; min-height: 1.2em; }
-
     .no-results { grid-column: 1/-1; text-align: center; padding: 3rem; color: #888; }
-
-    .solana-badge {
-      display: inline-flex; align-items: center; gap: 0.3rem;
-      font-size: 0.72rem; color: #9945FF; font-weight: 600;
-      background: #f3eeff; border-radius: 4px; padding: 0.15rem 0.45rem;
-    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>HYPE 24/7 &#x1F45F;</h1>
-  <input type="text" id="searchBar" placeholder="Search sneakers&hellip;" />
+  <span class="header-logo">HYPELIFE</span>
+  <input type="text" id="searchBar" placeholder="Search products&hellip;" />
   <button id="cartBtn">&#x1F6D2; Cart <span id="cartCount">0</span></button>
 </header>
 
@@ -205,12 +232,41 @@
   <span class="solana-badge">&#x26A1; Crypto Checkout</span>
 </section>
 
-<main class="product-grid" id="productGrid">
-  <div class="spinner"><div></div></div>
-</main>
+<!-- TABS -->
+<div class="section-tabs">
+  <button class="tab-btn active" data-tab="shoes">&#x1F45F; Shoes <span class="section-count" id="shoesCount">0</span></button>
+  <button class="tab-btn" data-tab="clothing">&#x1F455; Clothing <span class="section-count" id="clothingCount">0</span></button>
+  <button class="tab-btn" data-tab="collectables">&#x1F3C6; Collectables <span class="section-count" id="collectablesCount">0</span></button>
+</div>
 
+<!-- SHOES -->
+<div class="section-content active" id="tab-shoes">
+  <div class="section-header">
+    <h2>&#x1F45F; Shoes</h2>
+  </div>
+  <div class="product-grid" id="gridShoes">
+    <div class="spinner"><div></div></div>
+  </div>
+</div>
+
+<!-- CLOTHING -->
+<div class="section-content" id="tab-clothing">
+  <div class="section-header">
+    <h2>&#x1F455; Clothing</h2>
+  </div>
+  <div class="product-grid" id="gridClothing"></div>
+</div>
+
+<!-- COLLECTABLES -->
+<div class="section-content" id="tab-collectables">
+  <div class="section-header">
+    <h2>&#x1F3C6; Collectables</h2>
+  </div>
+  <div class="product-grid" id="gridCollectables"></div>
+</div>
+
+<!-- CART -->
 <div id="cartOverlay"></div>
-
 <div id="cartDrawer">
   <div class="cart-header">
     <h2>Your Cart &#x1F6D2;</h2>
@@ -219,47 +275,38 @@
   <div id="cartItems"></div>
   <div class="cart-footer">
     <div class="cart-total"><span>Total (USD)</span><span id="cartTotal">$0.00</span></div>
-    <div class="cart-total-crypto"><span id="cryptoLabel">≈ SOL</span><span id="cartCrypto">—</span></div>
+    <div class="cart-total-crypto"><span id="cryptoLabel">&#x2248; SOL</span><span id="cartCrypto">&mdash;</span></div>
     <button id="checkoutBtn" style="display:none">Checkout &rarr;</button>
     <div id="checkoutPanel">
       <p class="checkout-title">&#x26A1; Pay with Crypto</p>
-
-      <!-- Wallet connect -->
       <button id="connectWalletBtn">
         <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#AB9FF2"/><path d="M27.5 14.5C26.1 11.5 22.5 9.5 20 9.5C14.2 9.5 9.5 14.2 9.5 20S14.2 30.5 20 30.5C23.5 30.5 26.6 28.8 28.5 26.1" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M30.5 20H19.5M19.5 20L23 16.5M19.5 20L23 23.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Connect Phantom Wallet
       </button>
       <div id="walletInfo">Connected: <span id="walletAddr"></span></div>
-
-      <!-- Currency pick -->
       <div class="currency-toggle">
-        <button class="cur-btn active" id="curSol" data-cur="SOL">&#x25CE; SOL</button>
-        <button class="cur-btn" id="curUsdc" data-cur="USDC">&#x25CE; USDC</button>
+        <button class="cur-btn active" id="curSol">&#x25CE; SOL</button>
+        <button class="cur-btn" id="curUsdc">&#x25CE; USDC</button>
       </div>
-
-      <!-- Pay buttons -->
       <button class="pay-crypto-btn" id="paySolBtn" disabled>Pay with SOL</button>
       <button class="pay-crypto-btn" id="payUsdcBtn" disabled style="display:none">Pay with USDC</button>
-
       <div id="txStatus"></div>
       <button id="backBtn">&larr; Back</button>
     </div>
   </div>
 </div>
 
-<!-- Success modal -->
+<!-- MODALS -->
 <div class="modal-bg" id="successModal">
   <div class="modal-box">
     <div class="icon">&#x2705;</div>
     <h2>Payment Sent!</h2>
     <p>Your order is confirmed. Transaction signature:</p>
     <div class="sig" id="txSig"></div>
-    <p style="font-size:0.8rem;color:#9945FF">View on <a id="explorerLink" href="#" target="_blank" rel="noopener">Solana Explorer ↗</a></p>
+    <p style="font-size:0.8rem;color:#9945FF">View on <a id="explorerLink" href="#" target="_blank" rel="noopener">Solana Explorer &#x2197;</a></p>
     <button class="modal-close" id="successClose">Done</button>
   </div>
 </div>
-
-<!-- Error modal -->
 <div class="modal-bg" id="errorModal">
   <div class="modal-box">
     <div class="icon">&#x274C;</div>
@@ -270,36 +317,45 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<!-- Solana Web3.js -->
 <script src="https://unpkg.com/@solana/web3.js@1.98.0/lib/index.iife.min.js"></script>
-<!-- SPL Token for USDC -->
 <script src="https://unpkg.com/@solana/spl-token@0.4.9/lib/index.iife.js"></script>
-
 <script>
-// ═══════════════════════════════════════════════════════════
-//  CONFIG — your wallet + USDC mint
-// ═══════════════════════════════════════════════════════════
+// ── CONFIG ───────────────────────────────────────────────
 const MERCHANT_WALLET = '3NwyvRqqJw8Zyf2cNpJ6aUkpwpY4ZPkf3VZEqoEDmM3x';
-const USDC_MINT        = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // mainnet USDC
-const RPC_ENDPOINT     = 'https://api.mainnet-beta.solana.com';
+const USDC_MINT       = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const RPC_ENDPOINT    = 'https://api.mainnet-beta.solana.com';
 
-// Live price fetch (CoinGecko free API)
-let solPriceUSD  = null;
-let usdcPriceUSD = 1.0;
-let selectedCurrency = 'SOL';
+// ── CATEGORY KEYWORDS ────────────────────────────────────
+const SHOE_KEYWORDS = [
+  'nike','jordan','dunk','yeezy','air force','air max','kobe','adidas','new balance',
+  'asics','reebok','vans','converse','ugg','boot','sneaker','foamposite','kd ','lebron',
+  'curry','sb ','cleat','slide','sandal','samba','gazelle','ultraboost','nmr','990',
+  'foam runner','croc','birkenstock','saucony','puma','on cloud','hoka','salehe',
+  'travis','off-white','fear of god','fog','sacai','comme','cdg','tasman','tazz',
+  'chuck','blazer','cortez','waffle','gel-','gt-','gt ','800','700','500','574','990v',
+  'cpfm','mschf','sperry','timberland','uggs','loafer','mule','clog','platform'
+];
+const CLOTHING_KEYWORDS = [
+  'shirt','tee','hoodie','jacket','pant','short','hat','cap','beanie','sock',
+  'crewneck','sweatshirt','zip','puffer','coat','fleece','balaclava','glove',
+  'scarf','jersey','vest','polo','cardigan','sweater','windbreaker','anorak',
+  'racquet','tennis ball','kith wilson','wilson','bape','supreme shirt',
+  'stussy','palace','off white hoodie','essentials','fear of god shirt',
+  'wear','apparel','garment','top ','bottom','denim','jean','trouser','legging',
+  'compression','tank','longsleeve','long sleeve','rugby','flannel','button',
+  'quarter zip','half zip','crew neck','track suit','tracksuit','sweatpant',
+  'jogger','cargo','chino','khaki','blazer jacket','trench','rain jacket',
+  'down jacket','bubble','bomber','varsity'
+];
 
-async function fetchPrices() {
-  try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-    const d = await r.json();
-    solPriceUSD = d.solana.usd;
-    updateCryptoDisplay();
-  } catch(e) { solPriceUSD = null; }
+function classifyProduct(name) {
+  const n = name.toLowerCase();
+  for (const kw of CLOTHING_KEYWORDS) { if (n.includes(kw)) return 'clothing'; }
+  for (const kw of SHOE_KEYWORDS)     { if (n.includes(kw)) return 'shoes'; }
+  return 'collectables';
 }
 
-// ═══════════════════════════════════════════════════════════
-//  CSV + PRODUCT LOADING
-// ═══════════════════════════════════════════════════════════
+// ── CSV URLS ─────────────────────────────────────────────
 const csvUrls = [
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
@@ -314,11 +370,12 @@ const csvUrls = [
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
 ];
 
-let allProducts = [];
-let cart = [];
-let connectedPublicKey = null;
+// ── STATE ────────────────────────────────────────────────
+let allProducts = [], cart = [], connectedPublicKey = null;
+let solPriceUSD = null, selectedCurrency = 'SOL';
+let categorized = { shoes: [], clothing: [], collectables: [] };
 
-const productGrid   = document.getElementById('productGrid');
+// ── DOM ──────────────────────────────────────────────────
 const sizeFilter    = document.getElementById('sizeFilter');
 const searchBar     = document.getElementById('searchBar');
 const cartBtn       = document.getElementById('cartBtn');
@@ -340,50 +397,115 @@ const paySolBtn     = document.getElementById('paySolBtn');
 const payUsdcBtn    = document.getElementById('payUsdcBtn');
 const txStatus      = document.getElementById('txStatus');
 
+// ── TABS ─────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── PRICE FETCH ──────────────────────────────────────────
+async function fetchPrices() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+    solPriceUSD = (await r.json()).solana.usd;
+    updateCryptoDisplay();
+  } catch(e) {}
+}
+
+// ── CSV ──────────────────────────────────────────────────
 function fetchCSV(url) {
   return new Promise(resolve => {
-    Papa.parse(url, { download:true, header:true, complete: r=>resolve(r.data), error:()=>resolve([]) });
+    Papa.parse(url, { download:true, header:true, complete:r=>resolve(r.data), error:()=>resolve([]) });
   });
 }
 
 async function loadProducts() {
   const all = await Promise.all(csvUrls.map(fetchCSV));
   allProducts = all.flat().filter(p => p.name && p.price);
+
+  // Auto-categorize
+  categorized = { shoes: [], clothing: [], collectables: [] };
+  allProducts.forEach(p => categorized[classifyProduct(p.name)].push(p));
+
+  document.getElementById('shoesCount').textContent       = categorized.shoes.length;
+  document.getElementById('clothingCount').textContent    = categorized.clothing.length;
+  document.getElementById('collectablesCount').textContent= categorized.collectables.length;
+
   populateSizeFilter();
-  renderProducts(allProducts);
+  renderSection('shoes', categorized.shoes);
+  renderSection('clothing', categorized.clothing);
+  renderSection('collectables', categorized.collectables);
+}
+
+// ── SIZE FILTER ───────────────────────────────────────────
+function splitSizes(raw) {
+  if (!raw) return [];
+  return raw.split(/[,\/;|]+/)
+    .map(s => s.trim())
+    .filter(s => {
+      // Valid size formats:
+      // 10, 7.5        — no suffix (unisex/mens)
+      // 6W, 6.5W       — W = Women's
+      // 10M, 10.5M     — M = Men's
+      // 4C, 4.5C       — C = Preschool/Toddler
+      // 5Y, 6.5Y       — Y = Grade School
+      // Reject: X3, X4 (quantity), purely alpha strings
+      return s && /^[0-9]+(\.[0-9]+)?[WwMmCcYy]?$/.test(s);
+    });
+}
+
+// Returns a human-readable label for a size suffix
+function sizeLabel(size) {
+  const match = size.match(/^([0-9.]+)([WwMmCcYy]?)$/);
+  if (!match) return size;
+  const num = match[1];
+  const suffix = match[2].toUpperCase();
+  const labels = { 'W': "Women's", 'M': "Men's", 'C': 'Preschool/Toddler', 'Y': 'Grade School', '': '' };
+  return suffix ? `${num} ${labels[suffix]}` : num;
 }
 
 function populateSizeFilter() {
   const sizeSet = new Set();
-  allProducts.forEach(p => {
-    if (!p.size) return;
-    p.size.split(',').forEach(s => { const c=s.trim(); if(c) sizeSet.add(c); });
-  });
+  allProducts.forEach(p => splitSizes(p.size).forEach(s => sizeSet.add(s)));
   const sorted = [...sizeSet].sort((a,b) => parseFloat(a)-parseFloat(b));
   sizeFilter.innerHTML = '<option value="">All Sizes</option>';
   sorted.forEach(sz => {
     const opt = document.createElement('option');
-    opt.value = sz; opt.textContent = sz;
+    opt.value = sz; opt.textContent = sizeLabel(sz);
     sizeFilter.appendChild(opt);
   });
 }
 
-function renderProducts(products) {
-  productGrid.innerHTML = '';
+// ── RENDER ────────────────────────────────────────────────
+function renderSection(section, products) {
+  const grid = document.getElementById('grid' + section.charAt(0).toUpperCase() + section.slice(1));
+  grid.innerHTML = '';
+
   if (!products.length) {
-    productGrid.innerHTML = '<div class="no-results">No sneakers found.</div>';
+    grid.innerHTML = `<div class="empty-section" style="grid-column:1/-1">
+      <div class="es-icon">${section==='clothing'?'👕':section==='collectables'?'🏆':'👟'}</div>
+      <p>No ${section} found.</p>
+    </div>`;
     return;
   }
+
   products.forEach(p => {
     const sizes = p.size ? p.size.split(',').map(s=>s.trim()).filter(Boolean) : [];
     const multiSize = sizes.length > 1;
     const card = document.createElement('div');
     card.className = 'product-card';
     const sizeHTML = multiSize
-      ? `<select class="card-size-select">${sizes.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>`
-      : `<span class="size-tag">Size: ${sizes[0]||'N/A'}</span>`;
+      ? `<select class="card-size-select">${sizes.map(s=>`<option value="${s}">${sizeLabel(s)}</option>`).join('')}</select>`
+      : `<span class="size-tag">Size: ${sizes[0] ? sizeLabel(sizes[0]) : 'N/A'}</span>`;
     card.innerHTML = `
-      <img src="${p.picture||''}" alt="${p.name}" loading="lazy" onerror="this.src='';this.style.height='130px'">
+      <div class="img-wrap">
+        <img src="${p.picture||''}" alt="${p.name}" loading="lazy"
+             onerror="this.parentElement.style.background='#f0f0f0';this.style.display='none'">
+      </div>
       <h3>${p.name}</h3>
       <p class="price">${p.price}</p>
       ${sizeHTML}
@@ -396,28 +518,30 @@ function renderProducts(products) {
       this.classList.add('added');
       setTimeout(() => { this.textContent = 'Add to Cart'; this.classList.remove('added'); }, 1500);
     });
-    productGrid.appendChild(card);
+    grid.appendChild(card);
   });
 }
 
+// ── FILTER ───────────────────────────────────────────────
 function applyFilters() {
   const term = searchBar.value.toLowerCase().trim();
   const sz   = sizeFilter.value.trim();
-  const filtered = allProducts.filter(p => {
-    const nameMatch = p.name.toLowerCase().includes(term);
-    const pSizes = p.size ? p.size.split(',').map(s=>s.trim()) : [];
-    const sizeMatch = !sz || pSizes.includes(sz);
-    return nameMatch && sizeMatch;
+  ['shoes','clothing','collectables'].forEach(section => {
+    const filtered = categorized[section].filter(p => {
+      const nameMatch = p.name.toLowerCase().includes(term);
+      const pSizes = splitSizes(p.size);
+      const sizeMatch = !sz || pSizes.includes(sz);
+      return nameMatch && sizeMatch;
+    });
+    renderSection(section, filtered);
   });
-  renderProducts(filtered);
 }
 searchBar.addEventListener('input', applyFilters);
 sizeFilter.addEventListener('change', applyFilters);
 
-// ═══════════════════════════════════════════════════════════
-//  CART
-// ═══════════════════════════════════════════════════════════
+// ── CART ─────────────────────────────────────────────────
 function parsePriceNum(str) { return parseFloat((str||'').replace(/[^0-9.]/g,''))||0; }
+function getTotalUSD() { return cart.reduce((s,c)=>s+c.priceNum*c.qty,0); }
 
 function addToCart(product, size) {
   const key = product.name+'|'+size;
@@ -433,36 +557,28 @@ function changeQty(key, delta) {
   if(item.qty<=0) removeFromCart(key); else updateCartUI();
 }
 
-function getTotalUSD() { return cart.reduce((s,c)=>s+c.priceNum*c.qty,0); }
-
 function updateCryptoDisplay() {
   const total = getTotalUSD();
   if (selectedCurrency==='SOL') {
-    cryptoLabelEl.textContent = '≈ SOL';
-    if (solPriceUSD) cartCryptoEl.textContent = (total/solPriceUSD).toFixed(4)+' SOL';
-    else cartCryptoEl.textContent = 'fetching price…';
+    cryptoLabelEl.textContent='≈ SOL';
+    cartCryptoEl.textContent = solPriceUSD ? (total/solPriceUSD).toFixed(4)+' SOL' : 'fetching…';
   } else {
-    cryptoLabelEl.textContent = '≈ USDC';
+    cryptoLabelEl.textContent='≈ USDC';
     cartCryptoEl.textContent = total.toFixed(2)+' USDC';
   }
 }
 
 function updateCartUI() {
-  const totalItems = cart.reduce((s,c)=>s+c.qty,0);
-  cartCount.textContent = totalItems;
+  cartCount.textContent = cart.reduce((s,c)=>s+c.qty,0);
   cartTotalEl.textContent = '$'+getTotalUSD().toFixed(2);
   updateCryptoDisplay();
-
   if (cart.length===0) {
-    cartItemsEl.innerHTML = '<div class="empty-cart"><span>🛒</span>Your cart is empty.<br>Add some sneakers!</div>';
-    checkoutBtn.style.display='none';
-    checkoutPanel.classList.remove('open');
+    cartItemsEl.innerHTML='<div class="empty-cart"><span>🛒</span>Your cart is empty.<br>Add some products!</div>';
+    checkoutBtn.style.display='none'; checkoutPanel.classList.remove('open');
   } else {
-    checkoutBtn.style.display='block';
-    cartItemsEl.innerHTML='';
+    checkoutBtn.style.display='block'; cartItemsEl.innerHTML='';
     cart.forEach(item => {
-      const el=document.createElement('div');
-      el.className='cart-item';
+      const el=document.createElement('div'); el.className='cart-item';
       el.innerHTML=`
         <img src="${item.picture}" alt="${item.name}" onerror="this.src='';this.style.background='#eee'">
         <div class="cart-item-info">
@@ -476,39 +592,30 @@ function updateCartUI() {
           </div>
         </div>
         <button class="ci-remove" data-key="${item.key}">🗑</button>`;
-      el.querySelectorAll('.ci-qty button').forEach(btn=>btn.addEventListener('click',()=>changeQty(btn.dataset.key,parseInt(btn.dataset.d))));
+      el.querySelectorAll('.ci-qty button').forEach(b=>b.addEventListener('click',()=>changeQty(b.dataset.key,parseInt(b.dataset.d))));
       el.querySelector('.ci-remove').addEventListener('click',()=>removeFromCart(item.key));
       cartItemsEl.appendChild(el);
     });
   }
 }
 
-function openCart() {
-  checkoutPanel.classList.remove('open');
-  if(cart.length) checkoutBtn.style.display='block';
-  cartOverlay.classList.add('open');
-  cartDrawer.classList.add('open');
-}
+function openCart() { checkoutPanel.classList.remove('open'); if(cart.length) checkoutBtn.style.display='block'; cartOverlay.classList.add('open'); cartDrawer.classList.add('open'); }
 function closeCartFn() { cartOverlay.classList.remove('open'); cartDrawer.classList.remove('open'); }
-
 cartBtn.addEventListener('click', openCart);
 closeCartBtn.addEventListener('click', closeCartFn);
 cartOverlay.addEventListener('click', closeCartFn);
+checkoutBtn.addEventListener('click', ()=>{ checkoutBtn.style.display='none'; checkoutPanel.classList.add('open'); });
+backBtn.addEventListener('click', ()=>{ checkoutPanel.classList.remove('open'); checkoutBtn.style.display='block'; });
 
-checkoutBtn.addEventListener('click', () => { checkoutBtn.style.display='none'; checkoutPanel.classList.add('open'); });
-backBtn.addEventListener('click', () => { checkoutPanel.classList.remove('open'); checkoutBtn.style.display='block'; });
-
-// ═══════════════════════════════════════════════════════════
-//  CURRENCY TOGGLE
-// ═══════════════════════════════════════════════════════════
-document.getElementById('curSol').addEventListener('click', () => {
+// ── CURRENCY TOGGLE ───────────────────────────────────────
+document.getElementById('curSol').addEventListener('click', ()=>{
   selectedCurrency='SOL';
   document.getElementById('curSol').classList.add('active');
   document.getElementById('curUsdc').classList.remove('active');
   paySolBtn.style.display='block'; payUsdcBtn.style.display='none';
   updateCryptoDisplay();
 });
-document.getElementById('curUsdc').addEventListener('click', () => {
+document.getElementById('curUsdc').addEventListener('click', ()=>{
   selectedCurrency='USDC';
   document.getElementById('curUsdc').classList.add('active');
   document.getElementById('curSol').classList.remove('active');
@@ -516,143 +623,93 @@ document.getElementById('curUsdc').addEventListener('click', () => {
   updateCryptoDisplay();
 });
 
-// ═══════════════════════════════════════════════════════════
-//  PHANTOM WALLET
-// ═══════════════════════════════════════════════════════════
+// ── PHANTOM ───────────────────────────────────────────────
 function getProvider() {
   if ('phantom' in window && window.phantom?.solana?.isPhantom) return window.phantom.solana;
   if ('solana' in window && window.solana?.isPhantom) return window.solana;
   return null;
 }
-
-connectBtn.addEventListener('click', async () => {
-  const provider = getProvider();
-  if (!provider) {
-    window.open('https://phantom.app/', '_blank');
-    return;
-  }
+connectBtn.addEventListener('click', async ()=>{
+  const provider=getProvider();
+  if (!provider) { window.open('https://phantom.app/','_blank'); return; }
   try {
-    const resp = await provider.connect();
-    connectedPublicKey = resp.publicKey.toString();
-    walletAddrEl.textContent = connectedPublicKey.slice(0,4)+'...'+connectedPublicKey.slice(-4);
-    walletInfo.style.display='block';
-    connectBtn.style.display='none';
-    paySolBtn.disabled=false;
-    payUsdcBtn.disabled=false;
-  } catch(e) {
-    txStatus.textContent='Wallet connection cancelled.';
-  }
+    const resp=await provider.connect();
+    connectedPublicKey=resp.publicKey.toString();
+    walletAddrEl.textContent=connectedPublicKey.slice(0,4)+'...'+connectedPublicKey.slice(-4);
+    walletInfo.style.display='block'; connectBtn.style.display='none';
+    paySolBtn.disabled=false; payUsdcBtn.disabled=false;
+  } catch(e) { txStatus.textContent='Wallet connection cancelled.'; }
 });
 
-// ═══════════════════════════════════════════════════════════
-//  SOL PAYMENT
-// ═══════════════════════════════════════════════════════════
-paySolBtn.addEventListener('click', async () => {
+// ── SOL PAYMENT ───────────────────────────────────────────
+paySolBtn.addEventListener('click', async ()=>{
   if (!connectedPublicKey) { txStatus.textContent='Connect your wallet first.'; return; }
-  if (!solPriceUSD) { txStatus.textContent='SOL price not loaded yet, please wait.'; return; }
-  const totalUSD = getTotalUSD();
-  const solAmount = totalUSD / solPriceUSD;
-  const lamports = Math.round(solAmount * solanaWeb3.LAMPORTS_PER_SOL);
-
-  txStatus.textContent = 'Preparing transaction…';
-  paySolBtn.disabled = true;
-
+  if (!solPriceUSD) { txStatus.textContent='SOL price not loaded yet.'; return; }
+  const lamports=Math.round((getTotalUSD()/solPriceUSD)*solanaWeb3.LAMPORTS_PER_SOL);
+  txStatus.textContent='Preparing transaction…'; paySolBtn.disabled=true;
   try {
-    const provider   = getProvider();
-    const connection = new solanaWeb3.Connection(RPC_ENDPOINT, 'confirmed');
-    const fromPubkey = new solanaWeb3.PublicKey(connectedPublicKey);
-    const toPubkey   = new solanaWeb3.PublicKey(MERCHANT_WALLET);
-
-    const { blockhash } = await connection.getLatestBlockhash();
-    const tx = new solanaWeb3.Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
-    tx.add(solanaWeb3.SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
-
-    txStatus.textContent = 'Please approve in Phantom…';
-    const { signature } = await provider.signAndSendTransaction(tx);
-
-    txStatus.textContent = 'Confirming…';
-    await connection.confirmTransaction(signature, 'confirmed');
-
+    const provider=getProvider();
+    const connection=new solanaWeb3.Connection(RPC_ENDPOINT,'confirmed');
+    const fromPubkey=new solanaWeb3.PublicKey(connectedPublicKey);
+    const toPubkey=new solanaWeb3.PublicKey(MERCHANT_WALLET);
+    const {blockhash}=await connection.getLatestBlockhash();
+    const tx=new solanaWeb3.Transaction({recentBlockhash:blockhash,feePayer:fromPubkey});
+    tx.add(solanaWeb3.SystemProgram.transfer({fromPubkey,toPubkey,lamports}));
+    txStatus.textContent='Please approve in Phantom…';
+    const {signature}=await provider.signAndSendTransaction(tx);
+    txStatus.textContent='Confirming…';
+    await connection.confirmTransaction(signature,'confirmed');
     showSuccess(signature);
-  } catch(e) {
-    showError(e.message || 'Transaction failed.');
-  } finally {
-    paySolBtn.disabled = false;
-  }
+  } catch(e) { showError(e.message||'Transaction failed.'); }
+  finally { paySolBtn.disabled=false; }
 });
 
-// ═══════════════════════════════════════════════════════════
-//  USDC PAYMENT (SPL Token transfer)
-// ═══════════════════════════════════════════════════════════
-payUsdcBtn.addEventListener('click', async () => {
+// ── USDC PAYMENT ──────────────────────────────────────────
+payUsdcBtn.addEventListener('click', async ()=>{
   if (!connectedPublicKey) { txStatus.textContent='Connect your wallet first.'; return; }
-  const totalUSD = getTotalUSD();
-  const usdcAmount = Math.round(totalUSD * 1_000_000); // USDC has 6 decimals
-
-  txStatus.textContent = 'Preparing USDC transaction…';
-  payUsdcBtn.disabled = true;
-
+  const usdcAmount=Math.round(getTotalUSD()*1_000_000);
+  txStatus.textContent='Preparing USDC transaction…'; payUsdcBtn.disabled=true;
   try {
-    const provider    = getProvider();
-    const connection  = new solanaWeb3.Connection(RPC_ENDPOINT, 'confirmed');
-    const fromPubkey  = new solanaWeb3.PublicKey(connectedPublicKey);
-    const toPubkey    = new solanaWeb3.PublicKey(MERCHANT_WALLET);
-    const mintPubkey  = new solanaWeb3.PublicKey(USDC_MINT);
-
-    // Get or derive associated token accounts
-    const fromATA = await splToken.getAssociatedTokenAddress(mintPubkey, fromPubkey);
-    const toATA   = await splToken.getAssociatedTokenAddress(mintPubkey, toPubkey);
-
-    const { blockhash } = await connection.getLatestBlockhash();
-    const tx = new solanaWeb3.Transaction({ recentBlockhash: blockhash, feePayer: fromPubkey });
-
-    // Create merchant ATA if it doesn't exist
-    const toATAInfo = await connection.getAccountInfo(toATA);
-    if (!toATAInfo) {
-      tx.add(splToken.createAssociatedTokenAccountInstruction(fromPubkey, toATA, toPubkey, mintPubkey));
-    }
-
-    tx.add(splToken.createTransferInstruction(fromATA, toATA, fromPubkey, usdcAmount));
-
-    txStatus.textContent = 'Please approve in Phantom…';
-    const { signature } = await provider.signAndSendTransaction(tx);
-
-    txStatus.textContent = 'Confirming…';
-    await connection.confirmTransaction(signature, 'confirmed');
-
+    const provider=getProvider();
+    const connection=new solanaWeb3.Connection(RPC_ENDPOINT,'confirmed');
+    const fromPubkey=new solanaWeb3.PublicKey(connectedPublicKey);
+    const toPubkey=new solanaWeb3.PublicKey(MERCHANT_WALLET);
+    const mintPubkey=new solanaWeb3.PublicKey(USDC_MINT);
+    const fromATA=await splToken.getAssociatedTokenAddress(mintPubkey,fromPubkey);
+    const toATA=await splToken.getAssociatedTokenAddress(mintPubkey,toPubkey);
+    const {blockhash}=await connection.getLatestBlockhash();
+    const tx=new solanaWeb3.Transaction({recentBlockhash:blockhash,feePayer:fromPubkey});
+    const toATAInfo=await connection.getAccountInfo(toATA);
+    if (!toATAInfo) tx.add(splToken.createAssociatedTokenAccountInstruction(fromPubkey,toATA,toPubkey,mintPubkey));
+    tx.add(splToken.createTransferInstruction(fromATA,toATA,fromPubkey,usdcAmount));
+    txStatus.textContent='Please approve in Phantom…';
+    const {signature}=await provider.signAndSendTransaction(tx);
+    txStatus.textContent='Confirming…';
+    await connection.confirmTransaction(signature,'confirmed');
     showSuccess(signature);
-  } catch(e) {
-    showError(e.message || 'USDC transaction failed.');
-  } finally {
-    payUsdcBtn.disabled = false;
-  }
+  } catch(e) { showError(e.message||'USDC transaction failed.'); }
+  finally { payUsdcBtn.disabled=false; }
 });
 
-// ═══════════════════════════════════════════════════════════
-//  MODALS
-// ═══════════════════════════════════════════════════════════
+// ── MODALS ────────────────────────────────────────────────
 function showSuccess(sig) {
-  document.getElementById('txSig').textContent = sig;
-  document.getElementById('explorerLink').href = `https://explorer.solana.com/tx/${sig}`;
+  document.getElementById('txSig').textContent=sig;
+  document.getElementById('explorerLink').href=`https://explorer.solana.com/tx/${sig}`;
   document.getElementById('successModal').classList.add('open');
-  closeCartFn();
-  cart=[]; updateCartUI();
-  txStatus.textContent='';
+  closeCartFn(); cart=[]; updateCartUI(); txStatus.textContent='';
 }
 function showError(msg) {
-  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('errorMsg').textContent=msg;
   document.getElementById('errorModal').classList.add('open');
   txStatus.textContent='';
 }
-document.getElementById('successClose').addEventListener('click', ()=>document.getElementById('successModal').classList.remove('open'));
-document.getElementById('errorClose').addEventListener('click',   ()=>document.getElementById('errorModal').classList.remove('open'));
+document.getElementById('successClose').addEventListener('click',()=>document.getElementById('successModal').classList.remove('open'));
+document.getElementById('errorClose').addEventListener('click',()=>document.getElementById('errorModal').classList.remove('open'));
 
-// ═══════════════════════════════════════════════════════════
-//  BOOT
-// ═══════════════════════════════════════════════════════════
+// ── BOOT ─────────────────────────────────────────────────
 loadProducts();
 fetchPrices();
-setInterval(fetchPrices, 60000); // refresh SOL price every minute
+setInterval(fetchPrices, 60000);
 </script>
 </body>
 </html>
