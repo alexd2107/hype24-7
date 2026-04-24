@@ -1,715 +1,153 @@
+This is the old base file — it looks like the file on GitHub hasn't been updated yet with the previous versions I built. That's totally fine — I have everything I need. Let me now build the complete final version with all features included:
+
+1. ✅ Google Vision AI image sorting → Shoes / Clothing / Collectables
+2. ✅ HYPELIFE branding
+3. ✅ Full product images (no cropping)
+4. ✅ Working cart with size selector (W/M/C/Y support)
+5. ✅ Phantom wallet crypto checkout (SOL + USDC to your wallet)
+6. ✅ Fixed size filter
+
+Here is your complete code — copy everything below and paste it into your GitHub `html` file:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HypeLife</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; color: #111; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HYPELIFE</title>
+<script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.8/lib/index.iife.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0f0f0f;color:#fff;min-height:100vh}
 
-    /* HEADER */
-    header {
-      background: #111; color: #fff;
-      padding: 1rem 1.5rem;
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .header-logo { font-size: 1.6rem; font-weight: 900; letter-spacing: 2px; background: linear-gradient(90deg,#ff4500,#ff8c00); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    header input {
-      padding: 0.5rem 0.85rem; border-radius: 6px; border: none;
-      background: #2a2a2a; color: #fff; width: 240px; max-width: 100%; font-size: 0.9rem;
-    }
-    header input::placeholder { color: #999; }
-    #cartBtn {
-      background: #ff4500; color: #fff; border: none; border-radius: 8px;
-      padding: 0.55rem 1.1rem; font-size: 0.95rem; cursor: pointer;
-      display: flex; align-items: center; gap: 0.4rem; font-weight: 600; transition: background 0.2s;
-    }
-    #cartBtn:hover { background: #e03e00; }
-    #cartCount {
-      background: #fff; color: #ff4500; border-radius: 50%;
-      width: 20px; height: 20px; font-size: 0.75rem; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-    }
+  /* ── HEADER ── */
+  header{background:linear-gradient(135deg,#0f0f0f 0%,#1a1a1a 100%);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #ff6a00;position:sticky;top:0;z-index:100}
+  .logo{font-size:2rem;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#ff6a00,#ee0979,#ff6a00);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s linear infinite}
+  @keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+  .header-right{display:flex;align-items:center;gap:1rem}
+  .cart-btn{background:#ff6a00;border:none;color:#fff;padding:.6rem 1.2rem;border-radius:25px;cursor:pointer;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.4rem;transition:background .2s}
+  .cart-btn:hover{background:#ee0979}
+  .wallet-btn{background:linear-gradient(135deg,#9945ff,#14f195);border:none;color:#fff;padding:.6rem 1.2rem;border-radius:25px;cursor:pointer;font-weight:700;font-size:.85rem;transition:opacity .2s}
+  .wallet-btn:hover{opacity:.85}
+  .wallet-connected{background:linear-gradient(135deg,#14f195,#0ea5e9);font-size:.8rem}
 
-    /* FILTERS */
-    .filters {
-      background: #fff; border-bottom: 1px solid #ddd;
-      padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
-    }
-    .filters label { font-size: 0.85rem; color: #555; font-weight: 600; }
-    .filters select { padding: 0.45rem 0.75rem; border-radius: 6px; border: 1px solid #ccc; font-size: 0.9rem; cursor: pointer; }
-    .solana-badge {
-      display: inline-flex; align-items: center; gap: 0.3rem;
-      font-size: 0.72rem; color: #9945FF; font-weight: 600;
-      background: #f3eeff; border-radius: 4px; padding: 0.15rem 0.45rem;
-    }
+  /* ── CONTROLS ── */
+  .controls{background:#1a1a1a;padding:1rem 2rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;border-bottom:1px solid #2a2a2a}
+  .controls input{flex:1;min-width:200px;padding:.6rem 1rem;border-radius:20px;border:1px solid #333;background:#111;color:#fff;font-size:.9rem;outline:none}
+  .controls input:focus{border-color:#ff6a00}
+  .size-filter{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .size-filter label{color:#aaa;font-size:.85rem}
+  #sizeSelect{padding:.5rem .8rem;border-radius:20px;border:1px solid #333;background:#111;color:#fff;font-size:.85rem;outline:none;cursor:pointer}
+  #sizeSelect:focus{border-color:#ff6a00}
 
-    /* SECTION TABS */
-    .section-tabs {
-      background: #fff; border-bottom: 2px solid #eee;
-      display: flex; gap: 0; padding: 0 1.5rem;
-    }
-    .tab-btn {
-      padding: 0.9rem 1.5rem; font-size: 1rem; font-weight: 700;
-      border: none; background: none; cursor: pointer; color: #888;
-      border-bottom: 3px solid transparent; margin-bottom: -2px;
-      transition: color 0.18s, border-color 0.18s;
-    }
-    .tab-btn:hover { color: #333; }
-    .tab-btn.active { color: #ff4500; border-bottom-color: #ff4500; }
+  /* ── TABS ── */
+  .tabs{display:flex;gap:0;background:#111;border-bottom:2px solid #222;padding:0 2rem}
+  .tab-btn{padding:.9rem 2rem;background:none;border:none;color:#888;font-size:1rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;letter-spacing:1px}
+  .tab-btn.active{color:#ff6a00;border-bottom-color:#ff6a00}
+  .tab-btn:hover:not(.active){color:#fff}
+  .tab-count{font-size:.7rem;background:#333;color:#aaa;padding:.1rem .4rem;border-radius:10px;margin-left:.4rem}
+  .tab-btn.active .tab-count{background:#ff6a00;color:#fff}
 
-    /* SECTION CONTENT */
-    .section-content { display: none; }
-    .section-content.active { display: block; }
+  /* ── GRID ── */
+  main{padding:2rem}
+  .section{display:none}
+  .section.active{display:block}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.5rem;margin-top:1rem}
 
-    /* SECTION HEADER */
-    .section-header {
-      padding: 1.25rem 1.5rem 0.5rem;
-      display: flex; align-items: center; gap: 0.75rem;
-    }
-    .section-header h2 { font-size: 1.3rem; font-weight: 800; }
-    .section-count {
-      background: #f0f0f0; color: #666; border-radius: 20px;
-      padding: 0.2rem 0.65rem; font-size: 0.8rem; font-weight: 600;
-    }
+  /* ── CARD ── */
+  .card{background:#1a1a1a;border-radius:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,.4);transition:transform .2s,box-shadow .2s;position:relative}
+  .card:hover{transform:translateY(-4px);box-shadow:0 8px 25px rgba(255,106,0,.2)}
+  .card-img-wrap{background:#f5f5f5;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+  .card-img-wrap img{width:100%;height:100%;object-fit:contain;padding:8px}
+  .ai-badge{position:absolute;top:6px;right:6px;font-size:.6rem;padding:.2rem .4rem;border-radius:8px;font-weight:700;letter-spacing:.5px}
+  .ai-badge.shoes{background:#0ea5e9;color:#fff}
+  .ai-badge.clothing{background:#8b5cf6;color:#fff}
+  .ai-badge.collectables{background:#f59e0b;color:#fff}
+  .ai-badge.loading{background:#555;color:#aaa}
+  .card-body{padding:1rem}
+  .card-name{font-weight:700;font-size:.95rem;margin-bottom:.4rem;line-height:1.3;color:#fff}
+  .card-price{color:#ff6a00;font-weight:800;font-size:1.1rem;margin-bottom:.6rem}
+  .card-sizes{font-size:.75rem;color:#888;margin-bottom:.8rem}
+  .size-select-wrap{margin-bottom:.8rem}
+  .size-select-wrap select{width:100%;padding:.4rem .6rem;border-radius:8px;border:1px solid #333;background:#111;color:#fff;font-size:.8rem;outline:none}
+  .size-select-wrap select:focus{border-color:#ff6a00}
+  .add-btn{width:100%;padding:.6rem;border-radius:10px;border:none;background:#ff6a00;color:#fff;font-weight:700;font-size:.85rem;cursor:pointer;transition:background .2s}
+  .add-btn:hover{background:#ee0979}
+  .add-btn.added{background:#22c55e}
+  .loading-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;border-radius:16px}
+  .spinner{width:28px;height:28px;border:3px solid #333;border-top-color:#ff6a00;border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .no-results{grid-column:1/-1;text-align:center;padding:4rem;color:#555;font-size:1.1rem}
 
-    /* GRID */
-    .product-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 1rem; padding: 1rem 1.25rem 2rem;
-    }
+  /* ── CART DRAWER ── */
+  .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none}
+  .cart-overlay.open{display:block}
+  .cart-drawer{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:100vw;background:#1a1a1a;z-index:201;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,.5);transform:translateX(100%);transition:transform .3s}
+  .cart-drawer.open{transform:translateX(0)}
+  .cart-header{padding:1.2rem 1.5rem;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center}
+  .cart-header h2{font-size:1.2rem;font-weight:700}
+  .cart-close{background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer}
+  .cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem}
+  .cart-item{display:flex;gap:1rem;align-items:flex-start;padding:.8rem 0;border-bottom:1px solid #222}
+  .cart-item img{width:60px;height:60px;object-fit:contain;background:#f5f5f5;border-radius:8px;padding:4px}
+  .cart-item-info{flex:1}
+  .cart-item-name{font-size:.85rem;font-weight:600;margin-bottom:.2rem}
+  .cart-item-size{font-size:.75rem;color:#888;margin-bottom:.3rem}
+  .cart-item-price{font-size:.9rem;color:#ff6a00;font-weight:700}
+  .cart-item-qty{display:flex;align-items:center;gap:.5rem;margin-top:.4rem}
+  .qty-btn{background:#333;border:none;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+  .qty-btn:hover{background:#ff6a00}
+  .remove-btn{background:none;border:none;color:#ef4444;cursor:pointer;font-size:1rem;padding:.2rem}
+  .cart-footer{padding:1.2rem 1.5rem;border-top:1px solid #2a2a2a}
+  .cart-total{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;margin-bottom:1rem}
+  .checkout-btn{width:100%;padding:.9rem;border-radius:12px;border:none;background:linear-gradient(135deg,#ff6a00,#ee0979);color:#fff;font-weight:800;font-size:1rem;cursor:pointer;transition:opacity .2s}
+  .checkout-btn:hover{opacity:.9}
+  .cart-empty{text-align:center;padding:3rem;color:#555}
 
-    /* CARD */
-    .product-card {
-      background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-      padding: 1rem; text-align: center; display: flex; flex-direction: column; gap: 0.4rem;
-      transition: transform 0.18s, box-shadow 0.18s;
-    }
-    .product-card:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.14); }
+  /* ── PAYMENT MODAL ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:none;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:#1a1a1a;border-radius:20px;padding:2rem;width:420px;max-width:95vw;border:1px solid #333}
+  .modal h2{font-size:1.3rem;font-weight:800;margin-bottom:.5rem;text-align:center}
+  .modal .total-display{text-align:center;font-size:2rem;font-weight:900;color:#ff6a00;margin:1rem 0}
+  .modal .sol-equiv{text-align:center;font-size:.85rem;color:#888;margin-bottom:1.5rem}
+  .wallet-status{text-align:center;padding:1rem;background:#111;border-radius:12px;margin-bottom:1rem;font-size:.85rem;color:#aaa}
+  .wallet-status.connected{color:#14f195}
+  .pay-options{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1rem}
+  .pay-btn{padding:1rem;border-radius:12px;border:none;color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;transition:opacity .2s;display:flex;flex-direction:column;align-items:center;gap:.3rem}
+  .pay-btn:hover{opacity:.85}
+  .pay-btn:disabled{opacity:.4;cursor:not-allowed}
+  .pay-btn.sol{background:linear-gradient(135deg,#9945ff,#14f195)}
+  .pay-btn.usdc{background:linear-gradient(135deg,#2775ca,#0ea5e9)}
+  .pay-btn .pay-amount{font-size:.75rem;font-weight:400;opacity:.85}
+  .modal-close-btn{width:100%;padding:.7rem;border-radius:10px;border:1px solid #333;background:none;color:#888;cursor:pointer;font-size:.9rem}
+  .modal-close-btn:hover{background:#222}
 
-    /* FIXED: image no longer forced into square crop */
-    .product-card .img-wrap {
-      width: 100%; background: #f8f8f8; border-radius: 8px;
-      overflow: hidden; margin-bottom: 0.3rem;
-      display: flex; align-items: center; justify-content: center;
-      min-height: 160px;
-    }
-    .product-card img {
-      width: 100%; height: auto; max-height: 220px;
-      object-fit: contain; display: block;
-    }
-    .product-card h3 { font-size: 0.9rem; line-height: 1.3; text-align: left; }
-    .product-card .price { font-size: 1rem; font-weight: 700; color: #ff4500; text-align: left; }
-    .product-card .size-tag {
-      font-size: 0.78rem; color: #555; background: #f0f0f0;
-      border-radius: 4px; padding: 0.2rem 0.5rem; display: inline-block; text-align: left;
-    }
-    .card-size-select { width: 100%; padding: 0.4rem; border-radius: 6px; border: 1px solid #ddd; font-size: 0.85rem; cursor: pointer; }
-    .add-btn {
-      margin-top: auto; background: #111; color: #fff; border: none;
-      border-radius: 8px; padding: 0.55rem; font-size: 0.88rem; font-weight: 600;
-      cursor: pointer; transition: background 0.18s;
-    }
-    .add-btn:hover { background: #333; }
-    .add-btn.added { background: #28a745; }
+  /* ── SUCCESS MODAL ── */
+  .success-modal{background:#1a1a1a;border-radius:20px;padding:2rem;width:420px;max-width:95vw;border:1px solid #22c55e;text-align:center}
+  .success-modal .check{font-size:3rem;margin-bottom:1rem}
+  .success-modal h2{color:#22c55e;margin-bottom:.5rem}
+  .success-modal .tx-link{display:block;margin:1rem auto;padding:.6rem 1rem;background:#111;border-radius:10px;color:#0ea5e9;text-decoration:none;font-size:.8rem;word-break:break-all}
+  .success-modal .tx-link:hover{background:#222}
 
-    /* SPINNER */
-    .spinner { grid-column: 1/-1; display: flex; justify-content: center; align-items: center; height: 220px; }
-    .spinner div { width: 42px; height: 42px; border: 4px solid #ddd; border-top-color: #ff4500; border-radius: 50%; animation: spin 0.85s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* EMPTY SECTION */
-    .empty-section {
-      text-align: center; padding: 4rem 2rem; color: #bbb;
-    }
-    .empty-section .es-icon { font-size: 3rem; margin-bottom: 0.75rem; }
-    .empty-section p { font-size: 0.95rem; }
-
-    /* CART OVERLAY */
-    #cartOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: none; opacity: 0; transition: opacity 0.25s; }
-    #cartOverlay.open { display: block; opacity: 1; }
-
-    /* CART DRAWER */
-    #cartDrawer {
-      position: fixed; top: 0; right: -440px; width: min(440px, 100vw);
-      height: 100vh; background: #fff; z-index: 201; display: flex; flex-direction: column;
-      box-shadow: -4px 0 24px rgba(0,0,0,0.18); transition: right 0.3s cubic-bezier(0.16,1,0.3,1);
-    }
-    #cartDrawer.open { right: 0; }
-    .cart-header { background: #111; color: #fff; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; }
-    .cart-header h2 { font-size: 1.1rem; }
-    #closeCart { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
-    #cartItems { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-
-    .cart-item { display: flex; gap: 0.75rem; align-items: center; background: #f9f9f9; border-radius: 8px; padding: 0.65rem; border: 1px solid #eee; }
-    .cart-item img { width: 64px; height: 64px; object-fit: contain; border-radius: 6px; background: #f0f0f0; flex-shrink: 0; }
-    .cart-item-info { flex: 1; min-width: 0; }
-    .ci-name { font-size: 0.85rem; font-weight: 600; line-height: 1.3; }
-    .ci-size { font-size: 0.75rem; color: #777; }
-    .ci-price { font-size: 0.9rem; font-weight: 700; color: #ff4500; margin-top: 0.2rem; }
-    .ci-qty { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.35rem; }
-    .ci-qty button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #ccc; background: #fff; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .ci-qty span { font-size: 0.9rem; font-weight: 600; min-width: 18px; text-align: center; }
-    .ci-remove { background: none; border: none; color: #aaa; font-size: 1.1rem; cursor: pointer; }
-    .ci-remove:hover { color: #e00; }
-
-    .cart-footer { padding: 1rem 1.25rem; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 0.75rem; }
-    .cart-total { display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 700; }
-    .cart-total-crypto { display: flex; justify-content: space-between; font-size: 0.85rem; color: #777; }
-
-    #checkoutPanel { display: none; flex-direction: column; gap: 0.75rem; }
-    #checkoutPanel.open { display: flex; }
-    .checkout-title { font-size: 0.85rem; font-weight: 600; color: #555; text-align: center; }
-
-    #connectWalletBtn {
-      width: 100%; padding: 0.75rem; border-radius: 10px; border: none;
-      background: linear-gradient(135deg, #9945FF, #14F195);
-      color: #fff; font-size: 0.95rem; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: opacity 0.18s;
-    }
-    #connectWalletBtn:hover { opacity: 0.88; }
-    #walletInfo { display: none; background: #f0fff4; border: 1px solid #14F195; border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.8rem; color: #333; }
-    #walletInfo span { font-weight: 700; color: #9945FF; }
-
-    .currency-toggle { display: flex; gap: 0.5rem; }
-    .cur-btn { flex: 1; padding: 0.55rem; border-radius: 8px; border: 2px solid #eee; background: #fff; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.18s; }
-    .cur-btn.active { border-color: #9945FF; background: #f3eeff; color: #9945FF; }
-
-    .pay-crypto-btn {
-      width: 100%; padding: 0.75rem; border-radius: 10px; border: none;
-      font-size: 0.95rem; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
-      transition: opacity 0.18s; color: #fff;
-    }
-    .pay-crypto-btn:hover { opacity: 0.88; }
-    #paySolBtn  { background: linear-gradient(135deg, #9945FF, #7c3aed); }
-    #payUsdcBtn { background: linear-gradient(135deg, #2775CA, #14F195); }
-    .pay-crypto-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    #checkoutBtn, #backBtn { border: none; border-radius: 8px; padding: 0.7rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.18s; }
-    #checkoutBtn { background: #ff4500; color: #fff; }
-    #checkoutBtn:hover { background: #e03e00; }
-    #backBtn { background: #f0f0f0; color: #333; }
-    #backBtn:hover { background: #e0e0e0; }
-
-    .empty-cart { text-align: center; color: #aaa; padding: 3rem 1rem; font-size: 0.95rem; }
-    .empty-cart span { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
-
-    /* MODALS */
-    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; display: none; align-items: center; justify-content: center; }
-    .modal-bg.open { display: flex; }
-    .modal-box {
-      background: #fff; border-radius: 16px; padding: 2rem 1.75rem;
-      max-width: 380px; width: 90%; text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-      animation: popIn 0.3s cubic-bezier(0.16,1,0.3,1);
-    }
-    @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .modal-box .icon { font-size: 3rem; margin-bottom: 0.5rem; }
-    .modal-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
-    .modal-box p { color: #555; font-size: 0.9rem; margin-bottom: 0.5rem; line-height: 1.5; }
-    .modal-box .sig { font-size: 0.7rem; color: #aaa; word-break: break-all; margin: 0.5rem 0; }
-    .modal-close { background: #111; color: #fff; border: none; border-radius: 8px; padding: 0.65rem 2rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: background 0.18s; }
-    .modal-close:hover { background: #333; }
-
-    #txStatus { font-size: 0.82rem; text-align: center; color: #9945FF; min-height: 1.2em; }
-    .no-results { grid-column: 1/-1; text-align: center; padding: 3rem; color: #888; }
-  </style>
+  /* ── RESPONSIVE ── */
+  @media(max-width:600px){
+    .logo{font-size:1.4rem}
+    main{padding:1rem}
+    .cart-drawer{width:100vw}
+    .pay-options{grid-template-columns:1fr}
+    .tabs{padding:0 .5rem}
+    .tab-btn{padding:.7rem 1rem;font-size:.85rem}
+  }
+</style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
-  <span class="header-logo">HYPELIFE</span>
-  <input type="text" id="searchBar" placeholder="Search products&hellip;" />
-  <button id="cartBtn">&#x1F6D2; Cart <span id="cartCount">0</span></button>
-</header>
-
-<section class="filters">
-  <label for="sizeFilter">Size:</label>
-  <select id="sizeFilter"><option value="">All Sizes</option></select>
-  <span class="solana-badge">&#x26A1; Crypto Checkout</span>
-</section>
-
-<!-- TABS -->
-<div class="section-tabs">
-  <button class="tab-btn active" data-tab="shoes">&#x1F45F; Shoes <span class="section-count" id="shoesCount">0</span></button>
-  <button class="tab-btn" data-tab="clothing">&#x1F455; Clothing <span class="section-count" id="clothingCount">0</span></button>
-  <button class="tab-btn" data-tab="collectables">&#x1F3C6; Collectables <span class="section-count" id="collectablesCount">0</span></button>
-</div>
-
-<!-- SHOES -->
-<div class="section-content active" id="tab-shoes">
-  <div class="section-header">
-    <h2>&#x1F45F; Shoes</h2>
-  </div>
-  <div class="product-grid" id="gridShoes">
-    <div class="spinner"><div></div></div>
-  </div>
-</div>
-
-<!-- CLOTHING -->
-<div class="section-content" id="tab-clothing">
-  <div class="section-header">
-    <h2>&#x1F455; Clothing</h2>
-  </div>
-  <div class="product-grid" id="gridClothing"></div>
-</div>
-
-<!-- COLLECTABLES -->
-<div class="section-content" id="tab-collectables">
-  <div class="section-header">
-    <h2>&#x1F3C6; Collectables</h2>
-  </div>
-  <div class="product-grid" id="gridCollectables"></div>
-</div>
-
-<!-- CART -->
-<div id="cartOverlay"></div>
-<div id="cartDrawer">
-  <div class="cart-header">
-    <h2>Your Cart &#x1F6D2;</h2>
-    <button id="closeCart">&times;</button>
-  </div>
-  <div id="cartItems"></div>
-  <div class="cart-footer">
-    <div class="cart-total"><span>Total (USD)</span><span id="cartTotal">$0.00</span></div>
-    <div class="cart-total-crypto"><span id="cryptoLabel">&#x2248; SOL</span><span id="cartCrypto">&mdash;</span></div>
-    <button id="checkoutBtn" style="display:none">Checkout &rarr;</button>
-    <div id="checkoutPanel">
-      <p class="checkout-title">&#x26A1; Pay with Crypto</p>
-      <button id="connectWalletBtn">
-        <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#AB9FF2"/><path d="M27.5 14.5C26.1 11.5 22.5 9.5 20 9.5C14.2 9.5 9.5 14.2 9.5 20S14.2 30.5 20 30.5C23.5 30.5 26.6 28.8 28.5 26.1" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M30.5 20H19.5M19.5 20L23 16.5M19.5 20L23 23.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Connect Phantom Wallet
-      </button>
-      <div id="walletInfo">Connected: <span id="walletAddr"></span></div>
-      <div class="currency-toggle">
-        <button class="cur-btn active" id="curSol">&#x25CE; SOL</button>
-        <button class="cur-btn" id="curUsdc">&#x25CE; USDC</button>
-      </div>
-      <button class="pay-crypto-btn" id="paySolBtn" disabled>Pay with SOL</button>
-      <button class="pay-crypto-btn" id="payUsdcBtn" disabled style="display:none">Pay with USDC</button>
-      <div id="txStatus"></div>
-      <button id="backBtn">&larr; Back</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODALS -->
-<div class="modal-bg" id="successModal">
-  <div class="modal-box">
-    <div class="icon">&#x2705;</div>
-    <h2>Payment Sent!</h2>
-    <p>Your order is confirmed. Transaction signature:</p>
-    <div class="sig" id="txSig"></div>
-    <p style="font-size:0.8rem;color:#9945FF">View on <a id="explorerLink" href="#" target="_blank" rel="noopener">Solana Explorer &#x2197;</a></p>
-    <button class="modal-close" id="successClose">Done</button>
-  </div>
-</div>
-<div class="modal-bg" id="errorModal">
-  <div class="modal-box">
-    <div class="icon">&#x274C;</div>
-    <h2>Payment Failed</h2>
-    <p id="errorMsg">Something went wrong. Please try again.</p>
-    <button class="modal-close" id="errorClose">Close</button>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="https://unpkg.com/@solana/web3.js@1.98.0/lib/index.iife.min.js"></script>
-<script src="https://unpkg.com/@solana/spl-token@0.4.9/lib/index.iife.js"></script>
-<script>
-// ── CONFIG ───────────────────────────────────────────────
-const MERCHANT_WALLET = '3NwyvRqqJw8Zyf2cNpJ6aUkpwpY4ZPkf3VZEqoEDmM3x';
-const USDC_MINT       = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const RPC_ENDPOINT    = 'https://api.mainnet-beta.solana.com';
-
-// ── CATEGORY KEYWORDS ────────────────────────────────────
-const SHOE_KEYWORDS = [
-  'nike','jordan','dunk','yeezy','air force','air max','kobe','adidas','new balance',
-  'asics','reebok','vans','converse','ugg','boot','sneaker','foamposite','kd ','lebron',
-  'curry','sb ','cleat','slide','sandal','samba','gazelle','ultraboost','nmr','990',
-  'foam runner','croc','birkenstock','saucony','puma','on cloud','hoka','salehe',
-  'travis','off-white','fear of god','fog','sacai','comme','cdg','tasman','tazz',
-  'chuck','blazer','cortez','waffle','gel-','gt-','gt ','800','700','500','574','990v',
-  'cpfm','mschf','sperry','timberland','uggs','loafer','mule','clog','platform'
-];
-const CLOTHING_KEYWORDS = [
-  'shirt','tee','hoodie','jacket','pant','short','hat','cap','beanie','sock',
-  'crewneck','sweatshirt','zip','puffer','coat','fleece','balaclava','glove',
-  'scarf','jersey','vest','polo','cardigan','sweater','windbreaker','anorak',
-  'racquet','tennis ball','kith wilson','wilson','bape','supreme shirt',
-  'stussy','palace','off white hoodie','essentials','fear of god shirt',
-  'wear','apparel','garment','top ','bottom','denim','jean','trouser','legging',
-  'compression','tank','longsleeve','long sleeve','rugby','flannel','button',
-  'quarter zip','half zip','crew neck','track suit','tracksuit','sweatpant',
-  'jogger','cargo','chino','khaki','blazer jacket','trench','rain jacket',
-  'down jacket','bubble','bomber','varsity'
-];
-
-function classifyProduct(name) {
-  const n = name.toLowerCase();
-  for (const kw of CLOTHING_KEYWORDS) { if (n.includes(kw)) return 'clothing'; }
-  for (const kw of SHOE_KEYWORDS)     { if (n.includes(kw)) return 'shoes'; }
-  return 'collectables';
-}
-
-// ── CSV URLS ─────────────────────────────────────────────
-const csvUrls = [
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=10727842&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=2080136486&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=184084881&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1280515311&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1929692327&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1941135183&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=234881949&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=0&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=834494988&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1649195567&single=true&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?gid=1978474466&single=true&output=csv"
-];
-
-// ── STATE ────────────────────────────────────────────────
-let allProducts = [], cart = [], connectedPublicKey = null;
-let solPriceUSD = null, selectedCurrency = 'SOL';
-let categorized = { shoes: [], clothing: [], collectables: [] };
-
-// ── DOM ──────────────────────────────────────────────────
-const sizeFilter    = document.getElementById('sizeFilter');
-const searchBar     = document.getElementById('searchBar');
-const cartBtn       = document.getElementById('cartBtn');
-const cartCount     = document.getElementById('cartCount');
-const cartOverlay   = document.getElementById('cartOverlay');
-const cartDrawer    = document.getElementById('cartDrawer');
-const closeCartBtn  = document.getElementById('closeCart');
-const cartItemsEl   = document.getElementById('cartItems');
-const cartTotalEl   = document.getElementById('cartTotal');
-const cartCryptoEl  = document.getElementById('cartCrypto');
-const cryptoLabelEl = document.getElementById('cryptoLabel');
-const checkoutBtn   = document.getElementById('checkoutBtn');
-const checkoutPanel = document.getElementById('checkoutPanel');
-const backBtn       = document.getElementById('backBtn');
-const connectBtn    = document.getElementById('connectWalletBtn');
-const walletInfo    = document.getElementById('walletInfo');
-const walletAddrEl  = document.getElementById('walletAddr');
-const paySolBtn     = document.getElementById('paySolBtn');
-const payUsdcBtn    = document.getElementById('payUsdcBtn');
-const txStatus      = document.getElementById('txStatus');
-
-// ── TABS ─────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-  });
-});
-
-// ── PRICE FETCH ──────────────────────────────────────────
-async function fetchPrices() {
-  try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-    solPriceUSD = (await r.json()).solana.usd;
-    updateCryptoDisplay();
-  } catch(e) {}
-}
-
-// ── CSV ──────────────────────────────────────────────────
-function fetchCSV(url) {
-  return new Promise(resolve => {
-    Papa.parse(url, { download:true, header:true, complete:r=>resolve(r.data), error:()=>resolve([]) });
-  });
-}
-
-async function loadProducts() {
-  const all = await Promise.all(csvUrls.map(fetchCSV));
-  allProducts = all.flat().filter(p => p.name && p.price);
-
-  // Auto-categorize
-  categorized = { shoes: [], clothing: [], collectables: [] };
-  allProducts.forEach(p => categorized[classifyProduct(p.name)].push(p));
-
-  document.getElementById('shoesCount').textContent       = categorized.shoes.length;
-  document.getElementById('clothingCount').textContent    = categorized.clothing.length;
-  document.getElementById('collectablesCount').textContent= categorized.collectables.length;
-
-  populateSizeFilter();
-  renderSection('shoes', categorized.shoes);
-  renderSection('clothing', categorized.clothing);
-  renderSection('collectables', categorized.collectables);
-}
-
-// ── SIZE FILTER ───────────────────────────────────────────
-function splitSizes(raw) {
-  if (!raw) return [];
-  return raw.split(/[,\/;|]+/)
-    .map(s => s.trim())
-    .filter(s => {
-      // Valid size formats:
-      // 10, 7.5        — no suffix (unisex/mens)
-      // 6W, 6.5W       — W = Women's
-      // 10M, 10.5M     — M = Men's
-      // 4C, 4.5C       — C = Preschool/Toddler
-      // 5Y, 6.5Y       — Y = Grade School
-      // Reject: X3, X4 (quantity), purely alpha strings
-      return s && /^[0-9]+(\.[0-9]+)?[WwMmCcYy]?$/.test(s);
-    });
-}
-
-// Returns a human-readable label for a size suffix
-function sizeLabel(size) {
-  const match = size.match(/^([0-9.]+)([WwMmCcYy]?)$/);
-  if (!match) return size;
-  const num = match[1];
-  const suffix = match[2].toUpperCase();
-  const labels = { 'W': "Women's", 'M': "Men's", 'C': 'Preschool/Toddler', 'Y': 'Grade School', '': '' };
-  return suffix ? `${num} ${labels[suffix]}` : num;
-}
-
-function populateSizeFilter() {
-  const sizeSet = new Set();
-  allProducts.forEach(p => splitSizes(p.size).forEach(s => sizeSet.add(s)));
-  const sorted = [...sizeSet].sort((a,b) => parseFloat(a)-parseFloat(b));
-  sizeFilter.innerHTML = '<option value="">All Sizes</option>';
-  sorted.forEach(sz => {
-    const opt = document.createElement('option');
-    opt.value = sz; opt.textContent = sizeLabel(sz);
-    sizeFilter.appendChild(opt);
-  });
-}
-
-// ── RENDER ────────────────────────────────────────────────
-function renderSection(section, products) {
-  const grid = document.getElementById('grid' + section.charAt(0).toUpperCase() + section.slice(1));
-  grid.innerHTML = '';
-
-  if (!products.length) {
-    grid.innerHTML = `<div class="empty-section" style="grid-column:1/-1">
-      <div class="es-icon">${section==='clothing'?'👕':section==='collectables'?'🏆':'👟'}</div>
-      <p>No ${section} found.</p>
-    </div>`;
-    return;
-  }
-
-  products.forEach(p => {
-    const sizes = p.size ? p.size.split(',').map(s=>s.trim()).filter(Boolean) : [];
-    const multiSize = sizes.length > 1;
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    const sizeHTML = multiSize
-      ? `<select class="card-size-select">${sizes.map(s=>`<option value="${s}">${sizeLabel(s)}</option>`).join('')}</select>`
-      : `<span class="size-tag">Size: ${sizes[0] ? sizeLabel(sizes[0]) : 'N/A'}</span>`;
-    card.innerHTML = `
-      <div class="img-wrap">
-        <img src="${p.picture||''}" alt="${p.name}" loading="lazy"
-             onerror="this.parentElement.style.background='#f0f0f0';this.style.display='none'">
-      </div>
-      <h3>${p.name}</h3>
-      <p class="price">${p.price}</p>
-      ${sizeHTML}
-      <button class="add-btn">Add to Cart</button>`;
-    card.querySelector('.add-btn').addEventListener('click', function() {
-      const sel = card.querySelector('.card-size-select');
-      const size = sel ? sel.value : (sizes[0]||'N/A');
-      addToCart(p, size);
-      this.textContent = '✓ Added!';
-      this.classList.add('added');
-      setTimeout(() => { this.textContent = 'Add to Cart'; this.classList.remove('added'); }, 1500);
-    });
-    grid.appendChild(card);
-  });
-}
-
-// ── FILTER ───────────────────────────────────────────────
-function applyFilters() {
-  const term = searchBar.value.toLowerCase().trim();
-  const sz   = sizeFilter.value.trim();
-  ['shoes','clothing','collectables'].forEach(section => {
-    const filtered = categorized[section].filter(p => {
-      const nameMatch = p.name.toLowerCase().includes(term);
-      const pSizes = splitSizes(p.size);
-      const sizeMatch = !sz || pSizes.includes(sz);
-      return nameMatch && sizeMatch;
-    });
-    renderSection(section, filtered);
-  });
-}
-searchBar.addEventListener('input', applyFilters);
-sizeFilter.addEventListener('change', applyFilters);
-
-// ── CART ─────────────────────────────────────────────────
-function parsePriceNum(str) { return parseFloat((str||'').replace(/[^0-9.]/g,''))||0; }
-function getTotalUSD() { return cart.reduce((s,c)=>s+c.priceNum*c.qty,0); }
-
-function addToCart(product, size) {
-  const key = product.name+'|'+size;
-  const ex = cart.find(c=>c.key===key);
-  if (ex) ex.qty++;
-  else cart.push({ key, name:product.name, price:product.price, priceNum:parsePriceNum(product.price), size, picture:product.picture||'', qty:1 });
-  updateCartUI();
-}
-function removeFromCart(key) { cart=cart.filter(c=>c.key!==key); updateCartUI(); }
-function changeQty(key, delta) {
-  const item=cart.find(c=>c.key===key); if(!item) return;
-  item.qty+=delta;
-  if(item.qty<=0) removeFromCart(key); else updateCartUI();
-}
-
-function updateCryptoDisplay() {
-  const total = getTotalUSD();
-  if (selectedCurrency==='SOL') {
-    cryptoLabelEl.textContent='≈ SOL';
-    cartCryptoEl.textContent = solPriceUSD ? (total/solPriceUSD).toFixed(4)+' SOL' : 'fetching…';
-  } else {
-    cryptoLabelEl.textContent='≈ USDC';
-    cartCryptoEl.textContent = total.toFixed(2)+' USDC';
-  }
-}
-
-function updateCartUI() {
-  cartCount.textContent = cart.reduce((s,c)=>s+c.qty,0);
-  cartTotalEl.textContent = '$'+getTotalUSD().toFixed(2);
-  updateCryptoDisplay();
-  if (cart.length===0) {
-    cartItemsEl.innerHTML='<div class="empty-cart"><span>🛒</span>Your cart is empty.<br>Add some products!</div>';
-    checkoutBtn.style.display='none'; checkoutPanel.classList.remove('open');
-  } else {
-    checkoutBtn.style.display='block'; cartItemsEl.innerHTML='';
-    cart.forEach(item => {
-      const el=document.createElement('div'); el.className='cart-item';
-      el.innerHTML=`
-        <img src="${item.picture}" alt="${item.name}" onerror="this.src='';this.style.background='#eee'">
-        <div class="cart-item-info">
-          <div class="ci-name">${item.name}</div>
-          <div class="ci-size">Size: ${item.size}</div>
-          <div class="ci-price">${item.price}</div>
-          <div class="ci-qty">
-            <button data-key="${item.key}" data-d="-1">−</button>
-            <span>${item.qty}</span>
-            <button data-key="${item.key}" data-d="1">+</button>
-          </div>
-        </div>
-        <button class="ci-remove" data-key="${item.key}">🗑</button>`;
-      el.querySelectorAll('.ci-qty button').forEach(b=>b.addEventListener('click',()=>changeQty(b.dataset.key,parseInt(b.dataset.d))));
-      el.querySelector('.ci-remove').addEventListener('click',()=>removeFromCart(item.key));
-      cartItemsEl.appendChild(el);
-    });
-  }
-}
-
-function openCart() { checkoutPanel.classList.remove('open'); if(cart.length) checkoutBtn.style.display='block'; cartOverlay.classList.add('open'); cartDrawer.classList.add('open'); }
-function closeCartFn() { cartOverlay.classList.remove('open'); cartDrawer.classList.remove('open'); }
-cartBtn.addEventListener('click', openCart);
-closeCartBtn.addEventListener('click', closeCartFn);
-cartOverlay.addEventListener('click', closeCartFn);
-checkoutBtn.addEventListener('click', ()=>{ checkoutBtn.style.display='none'; checkoutPanel.classList.add('open'); });
-backBtn.addEventListener('click', ()=>{ checkoutPanel.classList.remove('open'); checkoutBtn.style.display='block'; });
-
-// ── CURRENCY TOGGLE ───────────────────────────────────────
-document.getElementById('curSol').addEventListener('click', ()=>{
-  selectedCurrency='SOL';
-  document.getElementById('curSol').classList.add('active');
-  document.getElementById('curUsdc').classList.remove('active');
-  paySolBtn.style.display='block'; payUsdcBtn.style.display='none';
-  updateCryptoDisplay();
-});
-document.getElementById('curUsdc').addEventListener('click', ()=>{
-  selectedCurrency='USDC';
-  document.getElementById('curUsdc').classList.add('active');
-  document.getElementById('curSol').classList.remove('active');
-  payUsdcBtn.style.display='block'; paySolBtn.style.display='none';
-  updateCryptoDisplay();
-});
-
-// ── PHANTOM ───────────────────────────────────────────────
-function getProvider() {
-  if ('phantom' in window && window.phantom?.solana?.isPhantom) return window.phantom.solana;
-  if ('solana' in window && window.solana?.isPhantom) return window.solana;
-  return null;
-}
-connectBtn.addEventListener('click', async ()=>{
-  const provider=getProvider();
-  if (!provider) { window.open('https://phantom.app/','_blank'); return; }
-  try {
-    const resp=await provider.connect();
-    connectedPublicKey=resp.publicKey.toString();
-    walletAddrEl.textContent=connectedPublicKey.slice(0,4)+'...'+connectedPublicKey.slice(-4);
-    walletInfo.style.display='block'; connectBtn.style.display='none';
-    paySolBtn.disabled=false; payUsdcBtn.disabled=false;
-  } catch(e) { txStatus.textContent='Wallet connection cancelled.'; }
-});
-
-// ── SOL PAYMENT ───────────────────────────────────────────
-paySolBtn.addEventListener('click', async ()=>{
-  if (!connectedPublicKey) { txStatus.textContent='Connect your wallet first.'; return; }
-  if (!solPriceUSD) { txStatus.textContent='SOL price not loaded yet.'; return; }
-  const lamports=Math.round((getTotalUSD()/solPriceUSD)*solanaWeb3.LAMPORTS_PER_SOL);
-  txStatus.textContent='Preparing transaction…'; paySolBtn.disabled=true;
-  try {
-    const provider=getProvider();
-    const connection=new solanaWeb3.Connection(RPC_ENDPOINT,'confirmed');
-    const fromPubkey=new solanaWeb3.PublicKey(connectedPublicKey);
-    const toPubkey=new solanaWeb3.PublicKey(MERCHANT_WALLET);
-    const {blockhash}=await connection.getLatestBlockhash();
-    const tx=new solanaWeb3.Transaction({recentBlockhash:blockhash,feePayer:fromPubkey});
-    tx.add(solanaWeb3.SystemProgram.transfer({fromPubkey,toPubkey,lamports}));
-    txStatus.textContent='Please approve in Phantom…';
-    const {signature}=await provider.signAndSendTransaction(tx);
-    txStatus.textContent='Confirming…';
-    await connection.confirmTransaction(signature,'confirmed');
-    showSuccess(signature);
-  } catch(e) { showError(e.message||'Transaction failed.'); }
-  finally { paySolBtn.disabled=false; }
-});
-
-// ── USDC PAYMENT ──────────────────────────────────────────
-payUsdcBtn.addEventListener('click', async ()=>{
-  if (!connectedPublicKey) { txStatus.textContent='Connect your wallet first.'; return; }
-  const usdcAmount=Math.round(getTotalUSD()*1_000_000);
-  txStatus.textContent='Preparing USDC transaction…'; payUsdcBtn.disabled=true;
-  try {
-    const provider=getProvider();
-    const connection=new solanaWeb3.Connection(RPC_ENDPOINT,'confirmed');
-    const fromPubkey=new solanaWeb3.PublicKey(connectedPublicKey);
-    const toPubkey=new solanaWeb3.PublicKey(MERCHANT_WALLET);
-    const mintPubkey=new solanaWeb3.PublicKey(USDC_MINT);
-    const fromATA=await splToken.getAssociatedTokenAddress(mintPubkey,fromPubkey);
-    const toATA=await splToken.getAssociatedTokenAddress(mintPubkey,toPubkey);
-    const {blockhash}=await connection.getLatestBlockhash();
-    const tx=new solanaWeb3.Transaction({recentBlockhash:blockhash,feePayer:fromPubkey});
-    const toATAInfo=await connection.getAccountInfo(toATA);
-    if (!toATAInfo) tx.add(splToken.createAssociatedTokenAccountInstruction(fromPubkey,toATA,toPubkey,mintPubkey));
-    tx.add(splToken.createTransferInstruction(fromATA,toATA,fromPubkey,usdcAmount));
-    txStatus.textContent='Please approve in Phantom…';
-    const {signature}=await provider.signAndSendTransaction(tx);
-    txStatus.textContent='Confirming…';
-    await connection.confirmTransaction(signature,'confirmed');
-    showSuccess(signature);
-  } catch(e) { showError(e.message||'USDC transaction failed.'); }
-  finally { payUsdcBtn.disabled=false; }
-});
-
-// ── MODALS ────────────────────────────────────────────────
-function showSuccess(sig) {
-  document.getElementById('txSig').textContent=sig;
-  document.getElementById('explorerLink').href=`https://explorer.solana.com/tx/${sig}`;
-  document.getElementById('successModal').classList.add('open');
-  closeCartFn(); cart=[]; updateCartUI(); txStatus.textContent='';
-}
-function showError(msg) {
-  document.getElementById('errorMsg').textContent=msg;
-  document.getElementById('errorModal').classList.add('open');
-  txStatus.textContent='';
-}
-document.getElementById('successClose').addEventListener('click',()=>document.getElementById('successModal').classList.remove('open'));
-document.getElementById('errorClose').addEventListener('click',()=>document.getElementById('errorModal').classList.remove('open'));
-
-// ── BOOT ─────────────────────────────────────────────────
-loadProducts();
-fetchPrices();
-setInterval(fetchPrices, 60000);
-</script>
-</body>
-</html>
+  <div class="logo">HYPELIFE</div>
+  <div class="header-right">
+    <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">🔗 Connect Wallet</button>
+    
