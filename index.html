@@ -1,80 +1,269 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hype24/7 - Home</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HYPELIFE - Premium Sneakers & Streetwear</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f8f9fa;
+            color: #111;
+        }
+        
+        /* Header */
+        header {
+            background: #111;
+            color: #fff;
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #ff5722;
+            text-decoration: none;
+        }
+        
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 2rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: #ff5722;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+            color: white;
+            padding: 8rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cta-button {
+            background: #111;
+            color: white;
+            padding: 1.2rem 3rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 700;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        /* Features Section */
+        .features {
+            max-width: 1400px;
+            margin: 5rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #111;
+        }
+        
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* Products Preview */
+        .products-preview {
+            background: #111;
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+        
+        .products-preview h2 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .products-preview p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+        
+        .browse-button {
+            background: #ff5722;
+            color: white;
+            padding: 1.2rem 3rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 700;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .browse-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255,87,34,0.4);
+        }
+        
+        /* Footer */
+        footer {
+            background: #111;
+            color: #fff;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 5rem;
+        }
+        
+        footer p {
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            nav a {
+                margin-left: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <div class="logo">Hype24/7</div>
-    <nav>
-      <a href="index.html" class="active">Home</a>
-      <a href="products.html">Shop</a>
-      <a href="about.html">About</a>
-    </nav>
-  </header>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <a href="index.html" class="logo">HYPELIFE</a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="products.html">Shop</a>
+                <a href="about.html">About</a>
+            </nav>
+        </div>
+    </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <h1>Welcome to Hype24/7</h1>
-    <p>Exclusive sneakers, updated 24/7 from live inventory.</p>
-    <a href="products.html" class="btn">Shop Now</a>
-  </section>
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Welcome to HYPELIFE</h1>
+        <p>Premium sneakers, streetwear & collectibles. Updated 24/7 from live inventory.</p>
+        <a href="products.html" class="cta-button">Shop Now</a>
+    </section>
 
-  <!-- Featured Products -->
-  <section class="featured">
-    <h2>Featured Sneakers</h2>
-    <div class="product-grid" id="featuredGrid"></div>
-  </section>
+    <!-- Features Section -->
+    <section class="features">
+        <div class="feature-card">
+            <div class="feature-icon">👟</div>
+            <h3>Exclusive Sneakers</h3>
+            <p>Curated collection of the most sought-after Air Jordans, limited editions, and rare finds.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Live Inventory</h3>
+            <p>Real-time updates 24/7. When you see it, it's available. No more sold-out disappointments.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💎</div>
+            <h3>Crypto Payments</h3>
+            <p>Pay with Solana (SOL) or USDC. Fast, secure blockchain transactions via Phantom Wallet.</p>
+        </div>
+    </section>
 
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 Hype24/7. All Rights Reserved.</p>
-  </footer>
+    <!-- Products Preview -->
+    <section class="products-preview">
+        <h2>Over 200+ Items Available</h2>
+        <p>Sneakers, streetwear, and exclusive collectibles waiting for you.</p>
+        <a href="products.html" class="browse-button">Browse Collection →</a>
+    </section>
 
-  <!-- PapaParse -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script>
-    const csvUrls = [
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRNR2S9ChRZ0QgYCH4EpAUK7KyVP-VwS4tTQhChdsGkA7h0sQNj0fjNvj-tDiAre66zzY6hIsKAdB-1/pub?output=csv"
-    ];
-    const featuredGrid = document.getElementById("featuredGrid");
-
-    async function fetchCSV(url) {
-      const response = await fetch(url);
-      const data = await response.text();
-      return Papa.parse(data, { header: true }).data;
-    }
-
-    async function loadFeatured() {
-      let products = [];
-      for (const url of csvUrls) {
-        const result = await fetchCSV(url);
-        products = products.concat(result);
-      }
-      renderFeatured(products.slice(0, 4)); // Show first 4
-    }
-
-    function renderFeatured(products) {
-      featuredGrid.innerHTML = "";
-      products.forEach(p => {
-        if (!p.Name) return;
-        const sizeValue = p.Size || p.Sizes || "N/A";
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.innerHTML = `
-          <h3>${p.Name}</h3>
-          <p><strong>Price:</strong> ${p.Price || "N/A"}</p>
-          <p><strong>Sizes:</strong> ${sizeValue}</p>
-        `;
-        featuredGrid.appendChild(card);
-      });
-    }
-
-    loadFeatured();
-  </script>
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 HYPELIFE. All Rights Reserved.</p>
+    </footer>
 </body>
 </html>
