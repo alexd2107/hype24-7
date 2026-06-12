@@ -216,6 +216,42 @@
 
     #txStatus { font-size: 0.82rem; text-align: center; color: #9945FF; min-height: 1.2em; }
     .no-results { grid-column: 1/-1; text-align: center; padding: 3rem; color: #888; }
+
+    /* SHIPPING FORM */
+    .ship-step-title { font-size: 0.95rem; font-weight: 800; color: #111; margin-bottom: 0.15rem; }
+    .ship-form { display: flex; flex-direction: column; gap: 0.55rem; }
+    .ship-form .ship-row { display: flex; gap: 0.55rem; }
+    .ship-form .ship-row > * { flex: 1; min-width: 0; }
+    .ship-form input {
+      width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px;
+      border: 1px solid #ddd; font-size: 0.9rem; background: #fafafa; color: #111;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .ship-form input:focus { outline: none; border-color: #ff4500; background: #fff; }
+    .ship-form input::placeholder { color: #aaa; }
+    .ship-form input.invalid { border-color: #e53935; background: #fff5f5; }
+    .field-error { color: #e53935; font-size: 0.8rem; min-height: 1em; text-align: center; }
+    #continueToPayBtn {
+      width: 100%; padding: 0.75rem; border-radius: 10px; border: none;
+      background: #ff4500; color: #fff; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: background 0.18s;
+    }
+    #continueToPayBtn:hover { background: #e03e00; }
+    #continueToPayBtn:disabled { opacity: 0.55; cursor: progress; }
+    #backToShipBtn { background: #f0f0f0; color: #333; border: none; border-radius: 8px; padding: 0.7rem; font-size: 0.9rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.18s; }
+    #backToShipBtn:hover { background: #e0e0e0; }
+    .order-ref-badge { font-size: 1rem; font-weight: 800; color: #ff4500; letter-spacing: 1px; margin: 0.25rem 0; }
+    .pay-card-btn {
+      width: 100%; padding: 0.8rem; border-radius: 10px; border: none;
+      background: #111; color: #fff; font-size: 0.98rem; font-weight: 800;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      transition: background 0.18s;
+    }
+    .pay-card-btn:hover { background: #333; }
+    .pay-card-btn:disabled { opacity: 0.55; cursor: progress; }
+    .pay-divider { display: flex; align-items: center; gap: 0.6rem; color: #999; font-size: 0.78rem; font-weight: 600; margin: 0.2rem 0; }
+    .pay-divider::before, .pay-divider::after { content: ""; flex: 1; height: 1px; background: #e5e5e5; }
+    .save-tag { color: #14b87a; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -278,20 +314,50 @@
     <div class="cart-total-crypto"><span id="cryptoLabel">&#x2248; SOL</span><span id="cartCrypto">&mdash;</span></div>
     <button id="checkoutBtn" style="display:none">Checkout &rarr;</button>
     <div id="checkoutPanel">
-      <p class="checkout-title">&#x26A1; Pay with Crypto</p>
-      <button id="connectWalletBtn">
-        <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#AB9FF2"/><path d="M27.5 14.5C26.1 11.5 22.5 9.5 20 9.5C14.2 9.5 9.5 14.2 9.5 20S14.2 30.5 20 30.5C23.5 30.5 26.6 28.8 28.5 26.1" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M30.5 20H19.5M19.5 20L23 16.5M19.5 20L23 23.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Connect Phantom Wallet
-      </button>
-      <div id="walletInfo">Connected: <span id="walletAddr"></span></div>
-      <div class="currency-toggle">
-        <button class="cur-btn active" id="curSol">&#x25CE; SOL</button>
-        <button class="cur-btn" id="curUsdc">&#x25CE; USDC</button>
+
+      <!-- STEP 1 — SHIPPING -->
+      <div id="shipStep">
+        <p class="ship-step-title">&#x1F4E6; Where should we ship it?</p>
+        <div class="ship-form">
+          <input id="sfName"    placeholder="Full name *" autocomplete="name">
+          <input id="sfEmail"   placeholder="Email *" type="email" autocomplete="email">
+          <input id="sfPhone"   placeholder="Phone (for delivery)" autocomplete="tel">
+          <input id="sfAddr1"   placeholder="Street address *" autocomplete="address-line1">
+          <input id="sfAddr2"   placeholder="Apt, suite, unit (optional)" autocomplete="address-line2">
+          <div class="ship-row">
+            <input id="sfCity"  placeholder="City *" autocomplete="address-level2">
+            <input id="sfState" placeholder="State" autocomplete="address-level1">
+          </div>
+          <div class="ship-row">
+            <input id="sfZip"     placeholder="ZIP / Postal *" autocomplete="postal-code">
+            <input id="sfCountry" placeholder="Country" value="US" autocomplete="country">
+          </div>
+        </div>
+        <div class="field-error" id="shipError"></div>
+        <button id="continueToPayBtn">Continue to Payment &rarr;</button>
+        <button id="backBtn">&larr; Back to cart</button>
       </div>
-      <button class="pay-crypto-btn" id="paySolBtn" disabled>Pay with SOL</button>
-      <button class="pay-crypto-btn" id="payUsdcBtn" disabled style="display:none">Pay with USDC</button>
-      <div id="txStatus"></div>
-      <button id="backBtn">&larr; Back</button>
+
+      <!-- STEP 2 — PAYMENT -->
+      <div id="payStep" style="display:none">
+        <p class="checkout-title">Choose how to pay</p>
+        <button class="pay-card-btn" id="payCardBtn">&#x1F4B3; Pay with Card &middot; $<span id="cardPriceLbl">0.00</span></button>
+        <div class="pay-divider" id="cryptoDivider">or pay with crypto &amp; <span class="save-tag">save <span id="discLbl">3</span>%</span></div>
+        <button id="connectWalletBtn">
+          <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#AB9FF2"/><path d="M27.5 14.5C26.1 11.5 22.5 9.5 20 9.5C14.2 9.5 9.5 14.2 9.5 20S14.2 30.5 20 30.5C23.5 30.5 26.6 28.8 28.5 26.1" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M30.5 20H19.5M19.5 20L23 16.5M19.5 20L23 23.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Connect Phantom Wallet
+        </button>
+        <div id="walletInfo">Connected: <span id="walletAddr"></span></div>
+        <div class="currency-toggle">
+          <button class="cur-btn active" id="curSol">&#x25CE; SOL</button>
+          <button class="cur-btn" id="curUsdc">&#x25CE; USDC</button>
+        </div>
+        <button class="pay-crypto-btn" id="paySolBtn" disabled>Pay with SOL</button>
+        <button class="pay-crypto-btn" id="payUsdcBtn" disabled style="display:none">Pay with USDC</button>
+        <div id="txStatus"></div>
+        <button id="backToShipBtn">&larr; Edit shipping</button>
+      </div>
+
     </div>
   </div>
 </div>
@@ -300,10 +366,14 @@
 <div class="modal-bg" id="successModal">
   <div class="modal-box">
     <div class="icon">&#x2705;</div>
-    <h2>Payment Sent!</h2>
-    <p>Your order is confirmed. Transaction signature:</p>
-    <div class="sig" id="txSig"></div>
-    <p style="font-size:0.8rem;color:#9945FF">View on <a id="explorerLink" href="#" target="_blank" rel="noopener">Solana Explorer &#x2197;</a></p>
+    <h2>Order Confirmed!</h2>
+    <div class="order-ref-badge" id="orderRefBadge"></div>
+    <p>Payment received. We'll email you when it ships.</p>
+    <div id="cryptoTxInfo">
+      <p style="font-size:0.78rem;color:#888;margin-bottom:0.2rem">Transaction signature:</p>
+      <div class="sig" id="txSig"></div>
+      <p style="font-size:0.8rem;color:#9945FF">View on <a id="explorerLink" href="#" target="_blank" rel="noopener">Solana Explorer &#x2197;</a></p>
+    </div>
     <button class="modal-close" id="successClose">Done</button>
   </div>
 </div>
@@ -324,6 +394,14 @@
 const MERCHANT_WALLET = '3NwyvRqqJw8Zyf2cNpJ6aUkpwpY4ZPkf3VZEqoEDmM3x';
 const USDC_MINT       = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const RPC_ENDPOINT    = 'https://api.mainnet-beta.solana.com';
+
+// ⬇️  Set this to your deployed backend (Render) URL. No trailing slash.
+//     e.g. 'https://hypelife-orders.onrender.com'
+const BACKEND_URL = 'https://hypelife-orders.onrender.com';
+
+// Crypto buyers pay this % less than the posted (card) price.
+// Keep this the same as CRYPTO_DISCOUNT_PCT on the backend.
+const CRYPTO_DISCOUNT_PCT = 3;
 
 // ── CATEGORY KEYWORDS ────────────────────────────────────
 
@@ -389,6 +467,7 @@ const csvUrls = [
 let allProducts = [], cart = [], connectedPublicKey = null;
 let solPriceUSD = null, selectedCurrency = 'SOL';
 let categorized = { shoes: [], clothing: [], collectables: [] };
+let currentOrderRef = null;
 
 // ── DOM ──────────────────────────────────────────────────
 const sizeFilter    = document.getElementById('sizeFilter');
@@ -557,6 +636,7 @@ sizeFilter.addEventListener('change', applyFilters);
 // ── CART ─────────────────────────────────────────────────
 function parsePriceNum(str) { return parseFloat((str||'').replace(/[^0-9.]/g,''))||0; }
 function getTotalUSD() { return cart.reduce((s,c)=>s+c.priceNum*c.qty,0); }
+function getCryptoUSD() { return getTotalUSD() * (1 - CRYPTO_DISCOUNT_PCT/100); }
 
 function addToCart(product, size) {
   const key = product.name+'|'+size;
@@ -573,12 +653,13 @@ function changeQty(key, delta) {
 }
 
 function updateCryptoDisplay() {
-  const total = getTotalUSD();
+  const total = getCryptoUSD();
+  const disc = CRYPTO_DISCOUNT_PCT ? ` (\u2212${CRYPTO_DISCOUNT_PCT}%)` : '';
   if (selectedCurrency==='SOL') {
-    cryptoLabelEl.textContent='≈ SOL';
+    cryptoLabelEl.textContent='≈ SOL'+disc;
     cartCryptoEl.textContent = solPriceUSD ? (total/solPriceUSD).toFixed(4)+' SOL' : 'fetching…';
   } else {
-    cryptoLabelEl.textContent='≈ USDC';
+    cryptoLabelEl.textContent='≈ USDC'+disc;
     cartCryptoEl.textContent = total.toFixed(2)+' USDC';
   }
 }
@@ -619,8 +700,113 @@ function closeCartFn() { cartOverlay.classList.remove('open'); cartDrawer.classL
 cartBtn.addEventListener('click', openCart);
 closeCartBtn.addEventListener('click', closeCartFn);
 cartOverlay.addEventListener('click', closeCartFn);
-checkoutBtn.addEventListener('click', ()=>{ checkoutBtn.style.display='none'; checkoutPanel.classList.add('open'); });
-backBtn.addEventListener('click', ()=>{ checkoutPanel.classList.remove('open'); checkoutBtn.style.display='block'; });
+// ── CHECKOUT STEPS + ORDER CREATION ──────────────────────
+const shipStep        = document.getElementById('shipStep');
+const payStep         = document.getElementById('payStep');
+const continueToPayBtn= document.getElementById('continueToPayBtn');
+const backToShipBtn   = document.getElementById('backToShipBtn');
+const shipError       = document.getElementById('shipError');
+const payCardBtn      = document.getElementById('payCardBtn');
+const cardPriceLbl    = document.getElementById('cardPriceLbl');
+const cryptoDivider   = document.getElementById('cryptoDivider');
+let   cardEnabled     = false;   // set from backend /api/health
+
+// reflect the discount % everywhere it's shown
+document.getElementById('discLbl').textContent = CRYPTO_DISCOUNT_PCT;
+
+function showShipStep() { shipStep.style.display='block'; payStep.style.display='none'; }
+function showPayStep()  {
+  shipStep.style.display='none'; payStep.style.display='block';
+  cardPriceLbl.textContent = getTotalUSD().toFixed(2);     // posted (card) price
+  payCardBtn.style.display = cardEnabled ? 'flex' : 'none';
+  cryptoDivider.style.display = cardEnabled ? 'flex' : 'none';
+}
+
+// Pay with card → ask backend for a Stripe Checkout session, then redirect.
+payCardBtn.addEventListener('click', async ()=>{
+  if (!currentOrderRef) return;
+  payCardBtn.disabled=true; const old=payCardBtn.innerHTML; payCardBtn.textContent='Redirecting…';
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/orders/${currentOrderRef}/checkout-session`, { method:'POST' });
+    if (!res.ok) throw new Error('session');
+    const { url } = await res.json();
+    window.location.href = url;          // Stripe-hosted payment page
+  } catch(e) {
+    txStatus.textContent = 'Could not start card checkout. Try crypto, or retry.';
+    payCardBtn.disabled=false; payCardBtn.innerHTML=old;
+  }
+});
+
+checkoutBtn.addEventListener('click', ()=>{
+  checkoutBtn.style.display='none';
+  checkoutPanel.classList.add('open');
+  showShipStep();                 // always start at shipping
+  shipError.textContent='';
+});
+backBtn.addEventListener('click', ()=>{   // back to cart
+  checkoutPanel.classList.remove('open');
+  checkoutBtn.style.display='block';
+});
+backToShipBtn.addEventListener('click', showShipStep);
+
+function gatherShipping() {
+  const v = id => document.getElementById(id).value.trim();
+  return {
+    name:v('sfName'), email:v('sfEmail'), phone:v('sfPhone'),
+    address1:v('sfAddr1'), address2:v('sfAddr2'), city:v('sfCity'),
+    state:v('sfState'), zip:v('sfZip'), country:v('sfCountry') || 'US'
+  };
+}
+
+function validateShipping(c) {
+  const required = { sfName:c.name, sfEmail:c.email, sfAddr1:c.address1, sfCity:c.city, sfZip:c.zip };
+  document.querySelectorAll('.ship-form input').forEach(i=>i.classList.remove('invalid'));
+  for (const [id, val] of Object.entries(required)) {
+    if (!val) { document.getElementById(id).classList.add('invalid'); return 'Please fill in all required (*) fields.'; }
+  }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c.email)) {
+    document.getElementById('sfEmail').classList.add('invalid'); return 'Please enter a valid email address.';
+  }
+  return null;
+}
+
+continueToPayBtn.addEventListener('click', async ()=>{
+  if (!cart.length) { shipError.textContent='Your cart is empty.'; return; }
+  const customer = gatherShipping();
+  const err = validateShipping(customer);
+  if (err) { shipError.textContent = err; return; }
+
+  shipError.textContent=''; continueToPayBtn.disabled=true; continueToPayBtn.textContent='Saving order…';
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/orders`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        items: cart.map(c=>({name:c.name,size:c.size,qty:c.qty,priceNum:c.priceNum,price:c.price})),
+        total_usd: getTotalUSD(),
+        customer
+      })
+    });
+    if (!res.ok) throw new Error('server '+res.status);
+    const data = await res.json();
+    currentOrderRef = data.ref;
+    showPayStep();                  // reveal wallet/pay UI
+  } catch(e) {
+    shipError.textContent = 'Could not reach the order server. Please try again in a moment.';
+  } finally {
+    continueToPayBtn.disabled=false; continueToPayBtn.textContent='Continue to Payment →';
+  }
+});
+
+// Tell the backend the wallet payment succeeded (non-blocking: money already moved).
+async function confirmOrder(signature, method) {
+  if (!currentOrderRef) return;
+  try {
+    await fetch(`${BACKEND_URL}/api/orders/${currentOrderRef}/confirm`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ payment_ref: signature, payment_method: method })
+    });
+  } catch(e) { /* order already exists as pending; merchant can reconcile by tx */ }
+}
 
 // ── CURRENCY TOGGLE ───────────────────────────────────────
 document.getElementById('curSol').addEventListener('click', ()=>{
@@ -660,7 +846,7 @@ connectBtn.addEventListener('click', async ()=>{
 paySolBtn.addEventListener('click', async ()=>{
   if (!connectedPublicKey) { txStatus.textContent='Connect your wallet first.'; return; }
   if (!solPriceUSD) { txStatus.textContent='SOL price not loaded yet.'; return; }
-  const lamports=Math.round((getTotalUSD()/solPriceUSD)*solanaWeb3.LAMPORTS_PER_SOL);
+  const lamports=Math.round((getCryptoUSD()/solPriceUSD)*solanaWeb3.LAMPORTS_PER_SOL);
   txStatus.textContent='Preparing transaction…'; paySolBtn.disabled=true;
   try {
     const provider=getProvider();
@@ -674,6 +860,7 @@ paySolBtn.addEventListener('click', async ()=>{
     const {signature}=await provider.signAndSendTransaction(tx);
     txStatus.textContent='Confirming…';
     await connection.confirmTransaction(signature,'confirmed');
+    await confirmOrder(signature,'crypto_sol');
     showSuccess(signature);
   } catch(e) { showError(e.message||'Transaction failed.'); }
   finally { paySolBtn.disabled=false; }
@@ -682,7 +869,7 @@ paySolBtn.addEventListener('click', async ()=>{
 // ── USDC PAYMENT ──────────────────────────────────────────
 payUsdcBtn.addEventListener('click', async ()=>{
   if (!connectedPublicKey) { txStatus.textContent='Connect your wallet first.'; return; }
-  const usdcAmount=Math.round(getTotalUSD()*1_000_000);
+  const usdcAmount=Math.round(getCryptoUSD()*1_000_000);
   txStatus.textContent='Preparing USDC transaction…'; payUsdcBtn.disabled=true;
   try {
     const provider=getProvider();
@@ -701,17 +888,27 @@ payUsdcBtn.addEventListener('click', async ()=>{
     const {signature}=await provider.signAndSendTransaction(tx);
     txStatus.textContent='Confirming…';
     await connection.confirmTransaction(signature,'confirmed');
+    await confirmOrder(signature,'crypto_usdc');
     showSuccess(signature);
   } catch(e) { showError(e.message||'USDC transaction failed.'); }
   finally { payUsdcBtn.disabled=false; }
 });
 
 // ── MODALS ────────────────────────────────────────────────
-function showSuccess(sig) {
-  document.getElementById('txSig').textContent=sig;
-  document.getElementById('explorerLink').href=`https://explorer.solana.com/tx/${sig}`;
+function showSuccess(sig, isCard) {
+  const badge = document.getElementById('orderRefBadge');
+  if (badge) badge.textContent = currentOrderRef ? 'Order ' + currentOrderRef : '';
+  const info = document.getElementById('cryptoTxInfo');
+  if (isCard) {
+    if (info) info.style.display='none';
+  } else {
+    if (info) info.style.display='block';
+    document.getElementById('txSig').textContent=sig;
+    document.getElementById('explorerLink').href=`https://explorer.solana.com/tx/${sig}`;
+  }
   document.getElementById('successModal').classList.add('open');
   closeCartFn(); cart=[]; updateCartUI(); txStatus.textContent='';
+  currentOrderRef=null; showShipStep();
 }
 function showError(msg) {
   document.getElementById('errorMsg').textContent=msg;
@@ -725,6 +922,24 @@ document.getElementById('errorClose').addEventListener('click',()=>document.getE
 loadProducts();
 fetchPrices();
 setInterval(fetchPrices, 60000);
+
+// Detect whether card payments are enabled on the backend.
+(async ()=>{
+  try {
+    const h = await (await fetch(`${BACKEND_URL}/api/health`)).json();
+    cardEnabled = !!h.stripe;
+  } catch(e) { cardEnabled = false; }
+})();
+
+// Returning from Stripe Checkout?  (success_url = ...?paid=card&ref=HL-XXXX)
+(function handleStripeReturn(){
+  const p = new URLSearchParams(location.search);
+  if (p.get('paid')==='card' && p.get('ref')) {
+    currentOrderRef = p.get('ref');
+    showSuccess(null, true);
+    history.replaceState({}, '', location.pathname);
+  }
+})();
 </script>
 </body>
 </html>

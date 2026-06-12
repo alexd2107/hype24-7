@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HypeLife · Orders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0e10; --panel:#fff; --ink:#111; --muted:#6b6b73; --line:#e7e7ea;
+    --orange:#ff4500; --orange-d:#e03e00; --purple:#9945FF; --green:#14b87a;
+    --soft:#f5f5f7; --softer:#fafafa;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Archivo',sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .mono{font-family:'Space Mono',monospace}
+
+  /* ── LOGIN ─────────────────────────────────────────── */
+  #login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:50;
+    background-image:radial-gradient(circle at 20% 20%,rgba(153,69,255,.18),transparent 45%),radial-gradient(circle at 85% 80%,rgba(255,69,0,.16),transparent 45%);}
+  .login-card{background:#161618;border:1px solid #232327;border-radius:18px;padding:2.4rem 2rem;width:min(380px,92vw);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .login-card .logo{font-weight:900;font-size:1.8rem;letter-spacing:2px;background:linear-gradient(90deg,#ff4500,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .login-card .sub{color:#8a8a93;font-size:.82rem;margin:.35rem 0 1.6rem;letter-spacing:.5px}
+  .login-card input{width:100%;padding:.85rem 1rem;border-radius:10px;border:1px solid #2c2c31;background:#0e0e10;color:#fff;font-size:.95rem;font-family:'Space Mono',monospace}
+  .login-card input:focus{outline:none;border-color:var(--orange)}
+  .login-card button{width:100%;margin-top:.9rem;padding:.85rem;border:none;border-radius:10px;background:var(--orange);color:#fff;font-weight:800;font-size:.95rem;cursor:pointer;transition:background .15s;font-family:'Archivo'}
+  .login-card button:hover{background:var(--orange-d)}
+  .login-err{color:#ff6b6b;font-size:.8rem;margin-top:.7rem;min-height:1em;text-align:center}
+
+  /* ── TOPBAR ────────────────────────────────────────── */
+  header{background:var(--bg);color:#fff;padding:.9rem 1.4rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+  header .logo{font-weight:900;font-size:1.3rem;letter-spacing:1.5px;background:linear-gradient(90deg,#ff4500,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  header .tag{font-family:'Space Mono';font-size:.7rem;color:#7a7a83;border:1px solid #2a2a30;border-radius:6px;padding:.15rem .5rem;letter-spacing:1px}
+  header .spacer{flex:1}
+  header .hbtn{background:#1d1d21;color:#e8e8ea;border:1px solid #2a2a30;border-radius:8px;padding:.5rem .85rem;font-size:.82rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;font-family:'Archivo'}
+  header .hbtn:hover{background:#26262b}
+  header .auto{display:inline-flex;align-items:center;gap:.45rem;font-size:.78rem;color:#9a9aa2}
+  .switch{position:relative;width:34px;height:18px}
+  .switch input{display:none}
+  .switch span{position:absolute;inset:0;background:#33333a;border-radius:20px;transition:.2s;cursor:pointer}
+  .switch span::after{content:"";position:absolute;width:14px;height:14px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s}
+  .switch input:checked + span{background:var(--green)}
+  .switch input:checked + span::after{transform:translateX(16px)}
+
+  /* ── STATS ─────────────────────────────────────────── */
+  .wrap{max-width:1100px;margin:0 auto;padding:1.4rem}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem;margin-bottom:1.3rem}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem;position:relative;overflow:hidden}
+  .stat .k{font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.6px;text-transform:uppercase}
+  .stat .v{font-size:1.7rem;font-weight:900;margin-top:.2rem;font-family:'Space Mono'}
+  .stat.accent{background:#111;color:#fff}
+  .stat.accent .k{color:#9a9aa2}
+  .stat .bar{position:absolute;left:0;top:0;bottom:0;width:4px}
+  .stat.b-new .bar{background:var(--orange)} .stat.b-ship .bar{background:var(--purple)} .stat.b-rev .bar{background:var(--green)}
+
+  /* ── TABS ──────────────────────────────────────────── */
+  .tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+  .tab{padding:.5rem 1rem;border-radius:20px;border:1px solid var(--line);background:#fff;color:#444;font-size:.83rem;font-weight:700;cursor:pointer;transition:.15s;font-family:'Archivo'}
+  .tab:hover{border-color:#ccc}
+  .tab.active{background:#111;color:#fff;border-color:#111}
+  .tab .cnt{opacity:.65;font-family:'Space Mono';margin-left:.3rem}
+
+  /* ── ORDER CARD ────────────────────────────────────── */
+  .orders{display:flex;flex-direction:column;gap:.85rem}
+  .order{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .o-top{display:flex;align-items:center;gap:.8rem;padding:.85rem 1.1rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .o-ref{font-family:'Space Mono';font-weight:700;font-size:1rem}
+  .o-date{font-size:.76rem;color:var(--muted);font-family:'Space Mono'}
+  .o-total{margin-left:auto;font-weight:900;font-size:1.15rem;font-family:'Space Mono';color:var(--orange)}
+  .pill{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:.22rem .6rem;border-radius:20px}
+  .p-pending{background:#fff3e0;color:#b26a00}.p-paid{background:#e8f5ff;color:#1577c2}
+  .p-packed{background:#f3eeff;color:#7c3aed}.p-shipped{background:#e9f9f1;color:#0c8a55}
+  .p-delivered{background:#eef2f5;color:#445}.p-cancelled{background:#fdeaea;color:#c0392b}
+  .pay-pill{font-family:'Space Mono';font-size:.66rem;font-weight:700;padding:.2rem .5rem;border-radius:6px;background:#f3eeff;color:var(--purple)}
+  .pay-pill.unpaid{background:#fdeaea;color:#c0392b}
+  .verified{color:var(--green);font-size:.7rem;font-weight:700}
+
+  .o-body{display:grid;grid-template-columns:1.1fr 1fr;gap:1rem;padding:1.1rem}
+  @media(max-width:680px){.o-body{grid-template-columns:1fr}}
+  .o-body h4{font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:.45rem}
+  .items{list-style:none;display:flex;flex-direction:column;gap:.3rem}
+  .items li{font-size:.86rem;display:flex;justify-content:space-between;gap:.5rem;border-bottom:1px dashed var(--line);padding-bottom:.3rem}
+  .items li .q{font-family:'Space Mono';color:var(--muted)}
+  .cust{font-size:.85rem;line-height:1.5}
+  .cust .nm{font-weight:700}
+  .cust a{color:var(--purple);text-decoration:none}
+  .tx{font-family:'Space Mono';font-size:.7rem;color:var(--muted);word-break:break-all}
+  .tx a{color:var(--purple)}
+
+  /* ── CONTROLS ──────────────────────────────────────── */
+  .o-ctrl{background:var(--softer);border-top:1px solid var(--line);padding:.9rem 1.1rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+  .o-ctrl select,.o-ctrl input{padding:.55rem .7rem;border-radius:8px;border:1px solid var(--line);font-size:.84rem;background:#fff;font-family:'Archivo'}
+  .o-ctrl input.mono{font-family:'Space Mono'}
+  .o-ctrl select{cursor:pointer;font-weight:700}
+  .o-ctrl input#tn{min-width:180px;flex:1}
+  .btn{border:none;border-radius:8px;padding:.55rem .95rem;font-size:.83rem;font-weight:800;cursor:pointer;font-family:'Archivo';transition:.15s}
+  .btn-save{background:var(--orange);color:#fff}.btn-save:hover{background:var(--orange-d)}
+  .btn-print{background:#111;color:#fff}.btn-print:hover{background:#333}
+  .btn-track{background:var(--purple);color:#fff;text-decoration:none;display:inline-flex;align-items:center}
+  .btn-track:hover{opacity:.88}
+  .saved-flag{color:var(--green);font-size:.78rem;font-weight:700}
+
+  .empty{text-align:center;padding:4rem 1rem;color:#aaa}
+  .empty .ic{font-size:2.6rem;margin-bottom:.5rem}
+  .banner{background:#fff7e6;border:1px solid #ffd591;color:#a86100;border-radius:10px;padding:.7rem 1rem;font-size:.82rem;margin-bottom:1rem}
+  .hidden{display:none!important}
+  .loading{text-align:center;color:var(--muted);padding:3rem;font-family:'Space Mono';font-size:.85rem}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-card">
+    <div class="logo">HYPELIFE</div>
+    <div class="sub">ORDERS · ADMIN CONSOLE</div>
+    <input id="pw" type="password" placeholder="Admin password" autocomplete="current-password">
+    <button id="loginBtn">Enter Dashboard</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <header>
+    <span class="logo">HYPELIFE</span>
+    <span class="tag" id="apiTag">ORDERS</span>
+    <span class="spacer"></span>
+    <label class="auto">Auto-refresh
+      <span class="switch"><input type="checkbox" id="autoChk" checked><span></span></span>
+    </label>
+    <button class="hbtn" id="refreshBtn">↻ Refresh</button>
+    <button class="hbtn" id="logoutBtn">Log out</button>
+  </header>
+
+  <div class="wrap">
+    <div id="banner" class="banner hidden"></div>
+    <div class="stats" id="stats"></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="orders" id="orders"><div class="loading">Loading orders…</div></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────
+// Point this at your deployed backend (same URL as in products.html). No trailing slash.
+const BACKEND_URL = 'https://hypelife-orders.onrender.com';
+
+// ── AUTH (token kept in sessionStorage; falls back to memory) ──
+let memToken = null;
+function setToken(t){ memToken=t; try{sessionStorage.setItem('hl_token',t)}catch(e){} }
+function getToken(){ if(memToken)return memToken; try{return sessionStorage.getItem('hl_token')}catch(e){return null} }
+function clearToken(){ memToken=null; try{sessionStorage.removeItem('hl_token')}catch(e){} }
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(path, opts={}){
+  const res = await fetch(BACKEND_URL+path, {
+    ...opts,
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken(),...(opts.headers||{})}
+  });
+  if(res.status===401){ clearToken(); showLogin('Session expired — log in again.'); throw new Error('401'); }
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.status===204?null:res.json();
+}
+
+// ── LOGIN FLOW ───────────────────────────────────────
+function showLogin(msg){ $('#app').classList.add('hidden'); $('#login').classList.remove('hidden'); $('#loginErr').textContent=msg||''; }
+function showApp(){ $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); }
+
+async function attemptLogin(pw){
+  setToken(pw);
+  $('#loginErr').textContent='Checking…';
+  try{
+    await api('/api/orders');         // validates the password
+    showApp(); loadOrders();
+  }catch(e){
+    clearToken();
+    $('#loginErr').textContent = e.message==='401' ? 'Wrong password.' :
+      'Could not reach the server. Check BACKEND_URL and that it\'s deployed.';
+    showLogin($('#loginErr').textContent);
+  }
+}
+$('#loginBtn').addEventListener('click',()=>attemptLogin($('#pw').value));
+$('#pw').addEventListener('keydown',e=>{ if(e.key==='Enter') attemptLogin($('#pw').value); });
+$('#logoutBtn').addEventListener('click',()=>{ clearToken(); showLogin(''); });
+
+// ── STATE ────────────────────────────────────────────
+let ALL=[], filter='active';
+const FILTERS=[
+  ['active','🔥 Needs action', o=>['paid','packed'].includes(o.status)],
+  ['shipped','📦 Shipped', o=>o.status==='shipped'],
+  ['delivered','✅ Delivered', o=>o.status==='delivered'],
+  ['pending','⏳ Unpaid', o=>o.status==='pending'],
+  ['all','All', ()=>true],
+];
+const CARRIERS={
+  usps:'https://tools.usps.com/go/TrackConfirmAction?tLabels=',
+  ups:'https://www.ups.com/track?tracknum=',
+  fedex:'https://www.fedex.com/fedextrack/?trknbr=',
+  dhl:'https://www.dhl.com/us-en/home/tracking.html?tracking-id=',
+  other:''
+};
+const trackUrl=(c,n)=> (CARRIERS[c]||'')+encodeURIComponent(n||'');
+
+// ── LOAD + RENDER ────────────────────────────────────
+async function loadOrders(){
+  try{ ALL = await api('/api/orders'); render(); }
+  catch(e){ if(e.message!=='401') $('#orders').innerHTML='<div class="empty"><div class="ic">⚠️</div>Failed to load orders.</div>'; }
+}
+$('#refreshBtn').addEventListener('click',loadOrders);
+
+function fmtDate(iso){ if(!iso)return '—'; const d=new Date(iso); return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+
+function render(){
+  // banner if backend still on placeholder
+  $('#banner').classList.toggle('hidden', !BACKEND_URL.includes('YOUR-BACKEND'));
+  if(BACKEND_URL.includes('YOUR-BACKEND')) $('#banner').textContent='⚠️ BACKEND_URL is still the placeholder — set it to your Render URL in admin.html and products.html.';
+
+  // stats
+  const paidOrders = ALL.filter(o=>o.payment_status==='paid');
+  const rev = paidOrders.reduce((s,o)=>s+(o.total_usd||0),0);
+  const needs = ALL.filter(o=>['paid','packed'].includes(o.status)).length;
+  const shipped = ALL.filter(o=>o.status==='shipped').length;
+  $('#stats').innerHTML = `
+    <div class="stat b-new"><div class="bar"></div><div class="k">Needs action</div><div class="v">${needs}</div></div>
+    <div class="stat b-ship"><div class="bar"></div><div class="k">In transit</div><div class="v">${shipped}</div></div>
+    <div class="stat b-rev"><div class="bar"></div><div class="k">Paid orders</div><div class="v">${paidOrders.length}</div></div>
+    <div class="stat accent"><div class="k">Revenue (paid)</div><div class="v">$${rev.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div></div>`;
+
+  // tabs
+  $('#tabs').innerHTML = FILTERS.map(([key,label,fn])=>{
+    const c = ALL.filter(fn).length;
+    return `<button class="tab ${key===filter?'active':''}" data-f="${key}">${label}<span class="cnt">${c}</span></button>`;
+  }).join('');
+  $('#tabs').querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{ filter=t.dataset.f; render(); }));
+
+  // orders
+  const fn = (FILTERS.find(f=>f[0]===filter)||FILTERS[0])[2];
+  const list = ALL.filter(fn);
+  if(!list.length){ $('#orders').innerHTML='<div class="empty"><div class="ic">🗂️</div>No orders here yet.</div>'; return; }
+  $('#orders').innerHTML = list.map(orderHTML).join('');
+  list.forEach(wireOrder);
+}
+
+function orderHTML(o){
+  const c=o.customer||{};
+  const items=(o.items||[]).map(i=>`<li><span>${esc(i.name)}${i.size&&i.size!=='N/A'?` · <b>${esc(i.size)}</b>`:''}</span><span class="q">×${i.qty||1}</span></li>`).join('');
+  const addr=[c.address1,c.address2,`${c.city||''} ${c.state||''} ${c.zip||''}`.trim(),c.country].filter(Boolean).map(esc).join('<br>');
+  const payCls=o.payment_status==='paid'?'':'unpaid';
+  const payTxt=(o.payment_method||'—').replace('crypto_','').toUpperCase();
+  const isCrypto=(o.payment_method||'').startsWith('crypto');
+  const txLink=o.payment_ref?(isCrypto
+    ?`<div class="tx">tx: <a href="https://explorer.solana.com/tx/${esc(o.payment_ref)}" target="_blank" rel="noopener">${esc(o.payment_ref.slice(0,22))}…</a></div>`
+    :`<div class="tx">stripe: ${esc(o.payment_ref)}</div>`):'';
+  const verified=o.verified?`<span class="verified">✓ ${isCrypto?'on-chain':'Stripe'}</span>`:'';
+  const opts=['pending','paid','packed','shipped','delivered','cancelled'].map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('');
+  const carOpts=Object.keys(CARRIERS).map(k=>`<option value="${k}" ${o.carrier===k?'selected':''}>${k.toUpperCase()}</option>`).join('');
+  const tUrl=o.tracking_number?trackUrl(o.carrier,o.tracking_number):'';
+  return `<div class="order" data-ref="${esc(o.ref)}">
+    <div class="o-top">
+      <span class="o-ref">${esc(o.ref)}</span>
+      <span class="pill p-${o.status}">${o.status}</span>
+      <span class="pay-pill ${payCls}">${esc(payTxt)}${o.payment_status!=='paid'?' · unpaid':''}</span> ${verified}
+      <span class="o-date">${fmtDate(o.created_at)}</span>
+      <span class="o-total">$${(o.total_usd||0).toFixed(2)}</span>
+    </div>
+    <div class="o-body">
+      <div><h4>Items</h4><ul class="items">${items||'<li>—</li>'}</ul>${txLink}</div>
+      <div><h4>Ship to</h4><div class="cust"><span class="nm">${esc(c.name)}</span><br>
+        ${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a><br>`:''}${c.phone?esc(c.phone)+'<br>':''}${addr}</div></div>
+    </div>
+    <div class="o-ctrl">
+      <select class="st">${opts}</select>
+      <select class="car">${carOpts}</select>
+      <input class="mono" id="tn" placeholder="Tracking number" value="${esc(o.tracking_number||'')}">
+      <button class="btn btn-save">Save</button>
+      <button class="btn btn-print">🖨 Packing slip</button>
+      ${tUrl?`<a class="btn btn-track" href="${tUrl}" target="_blank" rel="noopener">Track ↗</a>`:''}
+      <span class="saved-flag" style="display:none">✓ Saved</span>
+    </div>
+  </div>`;
+}
+
+function wireOrder(o){
+  const el=document.querySelector(`.order[data-ref="${o.ref}"]`);
+  if(!el)return;
+  el.querySelector('.btn-save').addEventListener('click',async function(){
+    this.disabled=true; this.textContent='Saving…';
+    const body={ status:el.querySelector('.st').value, carrier:el.querySelector('.car').value, tracking_number:el.querySelector('#tn').value.trim() };
+    try{
+      await api(`/api/orders/${o.ref}`,{method:'PATCH',body:JSON.stringify(body)});
+      const flag=el.querySelector('.saved-flag'); flag.style.display='inline';
+      setTimeout(()=>{ loadOrders(); },700);
+    }catch(e){ alert('Save failed: '+e.message); }
+    finally{ this.disabled=false; this.textContent='Save'; }
+  });
+  el.querySelector('.btn-print').addEventListener('click',()=>printSlip(o));
+}
+
+// ── PACKING SLIP ─────────────────────────────────────
+function printSlip(o){
+  const c=o.customer||{};
+  const rows=(o.items||[]).map(i=>`<tr><td>${esc(i.name)}</td><td>${esc(i.size&&i.size!=='N/A'?i.size:'')}</td><td style="text-align:center">${i.qty||1}</td></tr>`).join('');
+  const addr=[c.address1,c.address2,`${c.city||''}, ${c.state||''} ${c.zip||''}`,c.country].filter(x=>x&&x.trim()&&x.trim()!==',').map(esc).join('<br>');
+  const w=window.open('','_blank','width=420,height=640');
+  if(!w){ alert('Allow pop-ups to print packing slips.'); return; }
+  w.document.write(`<!doctype html><html><head><title>${esc(o.ref)} packing slip</title>
+    <style>
+      *{font-family:'Courier New',monospace;color:#000}
+      body{padding:24px;max-width:380px;margin:auto}
+      .brand{font-weight:900;font-size:22px;letter-spacing:2px}
+      hr{border:none;border-top:2px dashed #000;margin:14px 0}
+      .ref{font-size:20px;font-weight:bold}
+      .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#444;margin-top:12px}
+      table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px}
+      th,td{border-bottom:1px solid #ccc;padding:6px 4px;text-align:left}
+      .addr{font-size:14px;line-height:1.5;margin-top:4px}
+      .tot{font-size:16px;font-weight:bold;text-align:right;margin-top:10px}
+      .ft{font-size:10px;color:#666;margin-top:18px;text-align:center}
+    </style></head><body>
+    <div class="brand">HYPELIFE</div>
+    <hr>
+    <div class="ref">${esc(o.ref)}</div>
+    <div class="lbl">Order date</div><div>${esc(fmtDate(o.created_at))}</div>
+    <div class="lbl">Ship to</div><div class="addr"><b>${esc(c.name)}</b><br>${addr}<br>${esc(c.phone||'')}</div>
+    <div class="lbl">Items</div>
+    <table><thead><tr><th>Item</th><th>Size</th><th>Qty</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="tot">Total: $${(o.total_usd||0).toFixed(2)}</div>
+    <div class="lbl">Payment</div><div>${esc((o.payment_method||'—').replace('crypto_','').toUpperCase())} · ${o.payment_status==='paid'?'PAID':'UNPAID'}</div>
+    <div class="ft">Thank you for shopping HypeLife</div>
+    <script>window.onload=()=>{window.print();}<\/script>
+    </body></html>`);
+  w.document.close();
+}
+
+// ── AUTO REFRESH ─────────────────────────────────────
+let autoTimer=null;
+function setAuto(on){ if(autoTimer)clearInterval(autoTimer); autoTimer = on?setInterval(()=>{ if(!$('#app').classList.contains('hidden')) loadOrders(); },20000):null; }
+$('#autoChk').addEventListener('change',e=>setAuto(e.target.checked));
+setAuto(true);
+
+// ── BOOT ─────────────────────────────────────────────
+if(getToken()){ showApp(); loadOrders(); } else { showLogin(''); }
+</script>
+</body>
+</html>
