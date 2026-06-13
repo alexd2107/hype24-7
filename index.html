@@ -1,269 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HYPELIFE - Premium Sneakers & Streetwear</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f8f9fa;
-            color: #111;
-        }
-        
-        /* Header */
-        header {
-            background: #111;
-            color: #fff;
-            padding: 1.5rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: #ff5722;
-            text-decoration: none;
-        }
-        
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin-left: 2rem;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        nav a:hover {
-            color: #ff5722;
-        }
-        
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
-            color: white;
-            padding: 8rem 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 500px;
-            height: 500px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-        }
-        
-        .hero h1 {
-            font-size: 4rem;
-            font-weight: 900;
-            margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .hero p {
-            font-size: 1.5rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .cta-button {
-            background: #111;
-            color: white;
-            padding: 1.2rem 3rem;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 50px;
-            text-decoration: none;
-            display: inline-block;
-            font-weight: 700;
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        /* Features Section */
-        .features {
-            max-width: 1400px;
-            margin: 5rem auto;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 3rem;
-        }
-        
-        .feature-card {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #111;
-        }
-        
-        .feature-card p {
-            color: #666;
-            line-height: 1.6;
-        }
-        
-        /* Products Preview */
-        .products-preview {
-            background: #111;
-            color: white;
-            padding: 5rem 2rem;
-            text-align: center;
-        }
-        
-        .products-preview h2 {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .products-preview p {
-            font-size: 1.2rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.9;
-        }
-        
-        .browse-button {
-            background: #ff5722;
-            color: white;
-            padding: 1.2rem 3rem;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 50px;
-            text-decoration: none;
-            display: inline-block;
-            font-weight: 700;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .browse-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255,87,34,0.4);
-        }
-        
-        /* Footer */
-        footer {
-            background: #111;
-            color: #fff;
-            padding: 2rem;
-            text-align: center;
-            margin-top: 5rem;
-        }
-        
-        footer p {
-            opacity: 0.7;
-        }
-        
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero p {
-                font-size: 1.2rem;
-            }
-            
-            nav a {
-                margin-left: 1rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HYPELIFE — Sneakers, Streetwear & Graded Collectibles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0e10; --ink:#111; --paper:#f5f5f7; --white:#fff;
+    --orange:#ff4500; --orange-2:#ff8c00; --purple:#9945FF; --green:#14b87a;
+    --muted:#6b6b73; --line:#e7e7ea;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Archivo',sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .mono{font-family:'Space Mono',monospace}
+  a{text-decoration:none;color:inherit}
+
+  /* ── HEADER ─────────────────────────────── */
+  header{background:var(--bg);color:#fff;position:sticky;top:0;z-index:100;border-bottom:1px solid #1d1d22}
+  .nav{max-width:1200px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem}
+  .logo{font-weight:900;font-size:1.5rem;letter-spacing:1.5px;background:linear-gradient(90deg,var(--orange),var(--orange-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .live{display:inline-flex;align-items:center;gap:.4rem;font-family:'Space Mono';font-size:.66rem;color:#cfcfd6;border:1px solid #2a2a30;border-radius:20px;padding:.2rem .6rem;letter-spacing:1px}
+  .live .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(20,184,122,.6);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(20,184,122,.6)}70%{box-shadow:0 0 0 7px rgba(20,184,122,0)}100%{box-shadow:0 0 0 0 rgba(20,184,122,0)}}
+  .nav .spacer{flex:1}
+  .nav a.link{font-weight:700;font-size:.92rem;color:#e8e8ea;transition:color .2s}
+  .nav a.link:hover{color:var(--orange)}
+  .nav a.admin{display:inline-flex;align-items:center;gap:.4rem;background:#1d1d21;border:1px solid #2c2c31;color:#fff;font-weight:700;font-size:.85rem;padding:.5rem .9rem;border-radius:9px;transition:.18s}
+  .nav a.admin:hover{background:var(--orange);border-color:var(--orange)}
+
+  /* ── TICKER ─────────────────────────────── */
+  .ticker{background:var(--orange);color:#111;font-family:'Space Mono';font-weight:700;font-size:.8rem;letter-spacing:1px;overflow:hidden;white-space:nowrap;border-bottom:3px solid #111}
+  .ticker__track{display:inline-block;padding:.55rem 0;animation:scroll 28s linear infinite}
+  .ticker span{padding:0 1.4rem}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ── HERO ───────────────────────────────── */
+  .hero{position:relative;background:var(--bg);color:#fff;padding:6.5rem 1.5rem 7rem;text-align:center;overflow:hidden}
+  .orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;z-index:0}
+  .orb.a{width:420px;height:420px;background:var(--orange);top:-120px;right:-80px;animation:float 14s ease-in-out infinite}
+  .orb.b{width:360px;height:360px;background:var(--purple);bottom:-140px;left:-100px;animation:float 18s ease-in-out infinite reverse}
+  @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+  .hero__inner{position:relative;z-index:1;max-width:880px;margin:0 auto}
+  .eyebrow{font-family:'Space Mono';font-size:.8rem;letter-spacing:3px;color:var(--orange-2);margin-bottom:1.3rem;opacity:0;animation:rise .6s .05s forwards}
+  .hero h1{font-size:clamp(2.8rem,8vw,5.5rem);font-weight:900;line-height:.95;letter-spacing:-1px;margin-bottom:1.4rem;opacity:0;animation:rise .7s .15s forwards}
+  .hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--orange),var(--orange-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p{font-size:clamp(1rem,2.5vw,1.3rem);color:#c9c9d1;max-width:560px;margin:0 auto 2.4rem;line-height:1.5;opacity:0;animation:rise .7s .25s forwards}
+  .cta-row{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap;opacity:0;animation:rise .7s .35s forwards}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.05rem;padding:1rem 2rem;border-radius:50px;transition:transform .2s,box-shadow .2s;cursor:pointer;border:none}
+  .btn-primary{background:linear-gradient(90deg,var(--orange),var(--orange-2));color:#fff}
+  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(255,69,0,.4)}
+  .btn-ghost{background:transparent;color:#fff;border:1.5px solid #33333a}
+  .btn-ghost:hover{border-color:#fff;transform:translateY(-3px)}
+
+  /* ── FEATURES ───────────────────────────── */
+  .features{max-width:1100px;margin:-3.5rem auto 0;padding:0 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;position:relative;z-index:5}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:2rem 1.8rem;box-shadow:0 20px 50px rgba(0,0,0,.08);opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}
+  .card.in{opacity:1;transform:translateY(0)}
+  .card .ic{font-size:2.2rem;margin-bottom:1rem}
+  .card h3{font-size:1.25rem;font-weight:800;margin-bottom:.5rem}
+  .card p{color:var(--muted);line-height:1.55;font-size:.95rem}
+  .card .tag{display:inline-block;margin-top:.9rem;font-family:'Space Mono';font-size:.72rem;color:var(--purple);background:#f3eeff;padding:.2rem .55rem;border-radius:6px}
+
+  /* ── STATS BAND ─────────────────────────── */
+  .band{max-width:1100px;margin:4.5rem auto;padding:3rem 2rem;background:var(--bg);color:#fff;border-radius:24px;text-align:center;position:relative;overflow:hidden}
+  .band .num{font-family:'Space Mono';font-weight:700;font-size:clamp(3rem,10vw,5rem);line-height:1;background:linear-gradient(90deg,var(--orange),var(--orange-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .band .lbl{font-size:1.05rem;color:#b9b9c2;margin:.6rem 0 1.8rem;letter-spacing:.5px}
+
+  /* ── FOOTER ─────────────────────────────── */
+  footer{background:var(--bg);color:#fff;padding:3rem 1.5rem 2.4rem;text-align:center}
+  .flinks{display:flex;gap:1.6rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.4rem}
+  .flinks a{font-weight:700;color:#d4d4da;font-size:.95rem;transition:color .2s}
+  .flinks a:hover{color:var(--orange)}
+  footer .copy{font-family:'Space Mono';font-size:.78rem;color:#6b6b73}
+
+  @media (max-width:560px){
+    .nav a.link.hideSm{display:none}
+    .features{margin-top:-2rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;scroll-behavior:auto!important}
+    .eyebrow,.hero h1,.hero p,.cta-row,.card{opacity:1!important;transform:none!important}
+  }
+</style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="header-container">
-            <a href="index.html" class="logo">HYPELIFE</a>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="products.html">Shop</a>
-                <a href="about.html">About</a>
-            </nav>
-        </div>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1>Welcome to HYPELIFE</h1>
-        <p>Premium sneakers, streetwear & collectibles. Updated 24/7 from live inventory.</p>
-        <a href="products.html" class="cta-button">Shop Now</a>
-    </section>
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo">HYPELIFE</a>
+    <span class="live"><span class="dot"></span>LIVE 24/7</span>
+    <span class="spacer"></span>
+    <a href="index.html" class="link hideSm">Home</a>
+    <a href="products.html" class="link">Shop</a>
+    <a href="admin.html" class="admin">🔒 Admin</a>
+  </div>
+</header>
 
-    <!-- Features Section -->
-    <section class="features">
-        <div class="feature-card">
-            <div class="feature-icon">👟</div>
-            <h3>Exclusive Sneakers</h3>
-            <p>Curated collection of the most sought-after Air Jordans, limited editions, and rare finds.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3>Live Inventory</h3>
-            <p>Real-time updates 24/7. When you see it, it's available. No more sold-out disappointments.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">💎</div>
-            <h3>Crypto Payments</h3>
-            <p>Pay with Solana (SOL) or USDC. Fast, secure blockchain transactions via Phantom Wallet.</p>
-        </div>
-    </section>
+<div class="ticker">
+  <div class="ticker__track">
+    <span>AIR JORDAN</span><span>•</span><span>YEEZY</span><span>•</span><span>TRAVIS SCOTT</span><span>•</span><span>GRADED CARDS</span><span>•</span><span>STREETWEAR</span><span>•</span><span>POKÉMON PSA / BGS</span><span>•</span><span>RESTOCKED DAILY</span><span>•</span>
+    <span>AIR JORDAN</span><span>•</span><span>YEEZY</span><span>•</span><span>TRAVIS SCOTT</span><span>•</span><span>GRADED CARDS</span><span>•</span><span>STREETWEAR</span><span>•</span><span>POKÉMON PSA / BGS</span><span>•</span><span>RESTOCKED DAILY</span><span>•</span>
+  </div>
+</div>
 
-    <!-- Products Preview -->
-    <section class="products-preview">
-        <h2>Over 200+ Items Available</h2>
-        <p>Sneakers, streetwear, and exclusive collectibles waiting for you.</p>
-        <a href="products.html" class="browse-button">Browse Collection →</a>
-    </section>
+<section class="hero">
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+  <div class="hero__inner">
+    <div class="eyebrow">SNEAKERS · STREETWEAR · GRADED COLLECTIBLES</div>
+    <h1>The hype,<br><em>live 24/7.</em></h1>
+    <p>Authentic sneakers, streetwear, and graded cards — inventory updates in real time. Pay with card or crypto.</p>
+    <div class="cta-row">
+      <a href="products.html" class="btn btn-primary">Shop now →</a>
+      <a href="#why" class="btn btn-ghost">Why HypeLife</a>
+    </div>
+  </div>
+</section>
 
-    <!-- Footer -->
-    <footer>
-        <p>© 2025 HYPELIFE. All Rights Reserved.</p>
-    </footer>
+<section class="features" id="why">
+  <div class="card">
+    <div class="ic">✅</div>
+    <h3>100% authentic</h3>
+    <p>Every sneaker and card is the real deal — no replicas, ever. What you order is exactly what ships.</p>
+  </div>
+  <div class="card">
+    <div class="ic">⚡</div>
+    <h3>Live inventory</h3>
+    <p>Stock syncs in real time, all day every day. If you can see it, it's in stock and ready to cop.</p>
+  </div>
+  <div class="card">
+    <div class="ic">💳</div>
+    <h3>Card or crypto</h3>
+    <p>Check out with a card, or pay in SOL / USDC through Phantom.</p>
+    <span class="tag">save 3% paying with crypto</span>
+  </div>
+</section>
+
+<section class="band">
+  <div class="num" id="counter" data-target="200">0</div>
+  <div class="lbl">items live right now — and growing</div>
+  <a href="products.html" class="btn btn-primary">Browse the collection →</a>
+</section>
+
+<footer>
+  <div class="flinks">
+    <a href="index.html">Home</a>
+    <a href="products.html">Shop</a>
+    <a href="admin.html">🔒 Admin</a>
+  </div>
+  <div class="copy">© 2026 HYPELIFE — all rights reserved</div>
+</footer>
+
+<script>
+  // Scroll-reveal for feature cards
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.2});
+  document.querySelectorAll('.card').forEach((c,i)=>{ c.style.transitionDelay=(i*0.1)+'s'; io.observe(c); });
+
+  // Count-up stat when it scrolls into view
+  const counter = document.getElementById('counter');
+  const target = +counter.dataset.target;
+  let counted = false;
+  const cio = new IntersectionObserver((entries)=>{
+    if(entries[0].isIntersecting && !counted){
+      counted = true;
+      const dur=1400, t0=performance.now();
+      (function step(now){
+        const p=Math.min((now-t0)/dur,1);
+        counter.textContent = Math.floor(p*target) + (p===1?'+':'');
+        if(p<1) requestAnimationFrame(step);
+      })(t0);
+    }
+  },{threshold:.5});
+  cio.observe(counter);
+</script>
 </body>
 </html>
